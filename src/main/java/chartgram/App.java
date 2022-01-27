@@ -19,14 +19,13 @@ public class App implements ApplicationRunner {
     private ApplicationContext context;
 
     public static void main(String[] args) {
-        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Rome"));
         SpringApplication.run(App.class, args);
     }
 
     @Override
     public void run(ApplicationArguments arg0) throws Exception {
-        // TODO
-        log.debug(context.getBean(Configuration.class).getName());
+        Configuration configuration = context.getBean(Configuration.class);
+        TimeZone.setDefault(TimeZone.getTimeZone(configuration.getTimezone()));
     }
 
     @Autowired
@@ -34,6 +33,7 @@ public class App implements ApplicationRunner {
         this.context = context;
     }
 
+    // works only if running from jar
     public static String getArtifactVersion() {
         try {
             String s = App.class.getProtectionDomain().getCodeSource().getLocation().toURI().toString();
@@ -53,7 +53,7 @@ public class App implements ApplicationRunner {
             }
             return s;
         } catch (Exception e) {
-            log.error("Impossibile ottenere la versione dell'artefatto", e);
+            log.error("Cannot obtain artifact version", e);
             return null;
         }
     }

@@ -1,4 +1,4 @@
-package chartgram.config;
+package chartgram.config.spring;
 
 import org.springframework.boot.env.YamlPropertySourceLoader;
 
