@@ -11,8 +11,6 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.TimeZone;
 
-// TODO: disattivare server Tomcat se non necessario
-
 @SpringBootApplication
 @Slf4j
 public class App implements ApplicationRunner {
