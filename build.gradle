@@ -36,7 +36,7 @@ dependencies {
     implementation 'org.jfree:jfreechart:1.5.3'
 
     implementation 'org.springframework.boot:spring-boot-starter-web:2.6.2'
-    implementation 'org.springframework.boot:spring-boot-starter-security:2.6.2'
+    //implementation 'org.springframework.boot:spring-boot-starter-security:2.6.2'
     implementation 'org.springframework.boot:spring-boot-starter-webflux:2.6.2'
 
     implementation 'ch.qos.logback:logback-classic:1.2.10'
