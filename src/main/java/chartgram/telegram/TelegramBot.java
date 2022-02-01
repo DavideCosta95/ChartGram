@@ -21,6 +21,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Consumer;
 
 @Slf4j
 public class TelegramBot extends TelegramLongPollingBot {
@@ -31,8 +32,10 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 	private final Configuration configuration;
 	private final Language language;
+	private final List<Consumer<Update>> onGroupMessageReceivedHandlers;
 
 	public TelegramBot(Configuration configuration, Localization localization) throws BotStartupException {
+		this.onGroupMessageReceivedHandlers = new ArrayList<>();
 		this.configuration = configuration;
 		String languageName = configuration.getLanguage();
 		this.language = localization.getLanguage(languageName);
@@ -72,9 +75,11 @@ public class TelegramBot extends TelegramLongPollingBot {
 		}
 
 		Chat chat = message.getChat();
+		// TODO: test
+		onGroupMessageReceivedHandlers.forEach(e -> e.accept(update));
 
 		if (chat.isGroupChat() || chat.isSuperGroupChat()) {
-			// TODO
+			//onGroupMessageReceivedHandlers.forEach(e -> e.accept(update));
 		} else {
 			handlePrivateMessage(update);
 		}
@@ -288,6 +293,15 @@ public class TelegramBot extends TelegramLongPollingBot {
 			Thread.currentThread().interrupt();
 		}
 		return null;
+	}
+
+	public void addOnGroupMessageReceivedHandler(Consumer<Update> handler) {
+		this.onGroupMessageReceivedHandlers.add(handler);
+	}
+
+	// TODO: vedere equals
+	public void removeOnGroupMessageReceivedHandler(Consumer<Update> handler) {
+		this.onGroupMessageReceivedHandlers.remove(handler);
 	}
 
 	public String getBotName() {
