@@ -23,13 +23,18 @@ public class Group {
 	private String telegramId;
 
 	@Column(name="description")
-	@NonNull
 	private String description;
 
 	@Column(name="inserted_at", nullable = false)
 	@NonNull
 	private LocalDateTime insertedAt;
 
-	@OneToMany(mappedBy="group")
-	private Set<Message> messages;
+	//@OneToMany(mappedBy="group")
+	//private Set<Message> messages;
+
+	public Group(@NonNull String telegramId, String description, @NonNull LocalDateTime insertedAt) {
+		this.telegramId = telegramId;
+		this.description = description;
+		this.insertedAt = insertedAt;
+	}
 }

@@ -31,4 +31,15 @@ public class Message {
 
 	@Column(name="text")
 	private String text;
+
+	@Column(name = "has_media", nullable = false)
+	private Boolean hasMedia;
+
+	public Message(@NonNull LocalDateTime sentAt, User sender, Group group, String text, Boolean hasMedia) {
+		this.sentAt = sentAt;
+		this.sender = sender;
+		this.group = group;
+		this.text = text;
+		this.hasMedia = hasMedia;
+	}
 }

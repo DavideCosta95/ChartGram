@@ -1,8 +1,6 @@
 package chartgram;
 
 import chartgram.config.Configuration;
-import chartgram.persistence.service.UserService;
-import chartgram.persistence.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -11,7 +9,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
-import java.time.LocalDateTime;
 import java.util.TimeZone;
 
 @SpringBootApplication
@@ -27,9 +24,7 @@ public class App implements ApplicationRunner {
     public void run(ApplicationArguments arg0) throws Exception {
         Configuration configuration = context.getBean(Configuration.class);
         TimeZone.setDefault(TimeZone.getTimeZone(configuration.getTimezone()));
-        User user = new User();
-        user.setTelegramId("621");
-        user.setInsertedAt(LocalDateTime.now());
+        context.getBean(MessageController.class).startup();
     }
 
     @Autowired

@@ -1,22 +1,20 @@
 package chartgram.telegram;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NonNull;
 
 import java.io.Serializable;
 
 @Data
+@AllArgsConstructor
 public class TelegramUser implements Serializable {
+	@NonNull
 	private Long id;
+
 	private String firstName;
 	private String lastName;
 	private String nickname;
-
-	public TelegramUser(Long id, String firstName, String lastName, String nickname) {
-		this.id = id;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.nickname = nickname;
-	}
 
 	public String getIdAsString() {
 		return getId().toString();

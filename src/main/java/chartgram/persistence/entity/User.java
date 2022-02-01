@@ -23,21 +23,19 @@ public class User {
 	private String telegramId;
 
 	@Column(name="telegram_first_name")
-	@NonNull
 	private String telegramFirstName;
 
 	@Column(name="telegram_last_name")
-	@NonNull
 	private String telegramLastName;
 
 	@Column(name="telegram_username")
-	@NonNull
 	private String telegramUsername;
 
 	@Column(name="inserted_at", nullable = false)
 	@NonNull
 	private LocalDateTime insertedAt;
 
+	/*
 	@OneToMany(mappedBy="addedUserId")
 	private Set<JoinEvent> joinEventsReceived;
 
@@ -52,4 +50,13 @@ public class User {
 
 	@OneToMany(mappedBy="sender")
 	private Set<Message> messages;
+	*/
+
+	public User(@NonNull String telegramId, String telegramFirstName, String telegramLastName, String telegramUsername, @NonNull LocalDateTime insertedAt) {
+		this.telegramId = telegramId;
+		this.telegramFirstName = telegramFirstName;
+		this.telegramLastName = telegramLastName;
+		this.telegramUsername = telegramUsername;
+		this.insertedAt = insertedAt;
+	}
 }
