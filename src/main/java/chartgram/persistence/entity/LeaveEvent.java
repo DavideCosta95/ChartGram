@@ -24,9 +24,9 @@ public class LeaveEvent {
 	@ManyToOne
 	@JoinColumn(name = "leaving_user_id", nullable=false)
 	@NonNull
-	private User leavingUserId;
+	private User leavingUser;
 
 	@ManyToOne
 	@JoinColumn(name = "remover_user_id", nullable=true)
-	private User removerUserId;
+	private User removerUser;
 }

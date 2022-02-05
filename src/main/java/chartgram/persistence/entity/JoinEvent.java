@@ -24,9 +24,9 @@ public class JoinEvent {
 	@ManyToOne
 	@JoinColumn(name = "added_user_id", nullable=false)
 	@NonNull
-	private User addedUserId;
+	private User addedUser;
 
 	@ManyToOne
 	@JoinColumn(name = "adder_user_id", nullable=true)
-	private User adderUserId;
+	private User adderUser;
 }

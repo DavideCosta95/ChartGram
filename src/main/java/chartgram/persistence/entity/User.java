@@ -6,7 +6,6 @@ import lombok.NonNull;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -34,23 +33,6 @@ public class User {
 	@Column(name="inserted_at", nullable = false)
 	@NonNull
 	private LocalDateTime insertedAt;
-
-	/*
-	@OneToMany(mappedBy="addedUserId")
-	private Set<JoinEvent> joinEventsReceived;
-
-	@OneToMany(mappedBy="adderUserId")
-	private Set<JoinEvent> joinEventsMade;
-
-	@OneToMany(mappedBy="leavingUserId")
-	private Set<LeaveEvent> leaveEventsMade;
-
-	@OneToMany(mappedBy="removerUserId")
-	private Set<LeaveEvent> leaveEventsReceived;
-
-	@OneToMany(mappedBy="sender")
-	private Set<Message> messages;
-	*/
 
 	public User(@NonNull String telegramId, String telegramFirstName, String telegramLastName, String telegramUsername, @NonNull LocalDateTime insertedAt) {
 		this.telegramId = telegramId;

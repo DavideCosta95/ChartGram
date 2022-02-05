@@ -1,1 +1,0 @@
-insert into users (telegram_id, telegram_first_name, telegram_last_name, telegram_username, inserted_at) values('id', 'name', 'last name', 'username', CURRENT_TIMESTAMP());
