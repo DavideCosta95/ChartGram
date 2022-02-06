@@ -14,7 +14,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -26,11 +28,13 @@ public class MessageController {
 	private final JoinEventService joinEventService;
 	private final LeaveEventService leaveEventService;
 
-	private final Map<String, User> knownUsers;
+	private Map<String, User> knownUsers;
+	private Map<String, Group> knownGroups;
 
 	@Autowired
 	private MessageController(TelegramBot bot, UserService userService, MessageService messageService, GroupService groupService, JoinEventService joinEventService, LeaveEventService leaveEventService) {
 		this.knownUsers = new HashMap<>();
+		this.knownGroups = new HashMap<>();
 		this.bot = bot;
 		this.userService = userService;
 		this.messageService = messageService;
@@ -43,6 +47,8 @@ public class MessageController {
 		bot.addOnGroupMessageReceivedHandler(this::handleGroupMessage);
 		bot.addOnJoiningUserHandler(this::handleJoinUpdate);
 		bot.addOnLeavingUserHandler(this::handleLeaveUpdate);
+		knownUsers = userService.list().stream().collect(Collectors.toMap(User::getTelegramId, Function.identity()));
+		knownGroups = groupService.list().stream().collect(Collectors.toMap(Group::getTelegramId, Function.identity()));
 	}
 
 	private void handleGroupMessage(Update update) {
@@ -52,14 +58,12 @@ public class MessageController {
 		org.telegram.telegrambots.meta.api.objects.User sender = incomingMessage.getFrom();
 
 		User user = new User(sender.getId().toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName(), now);
-		Group group = new Group(update.getMessage().getChatId().toString(), update.getMessage().getChat().getDescription(), now);
+		user = addKnownUser(user);
 
-		user = userService.add(user);
-		group = groupService.add(group);
+		Group group = new Group(update.getMessage().getChatId().toString(), update.getMessage().getChat().getDescription(), now);
+		group = addKnownGroup(group);
 
 		Message message = new Message(now, user, group, text, hasMedia(incomingMessage));
-
-		addKnownUser(user);
 		messageService.add(message);
 	}
 
@@ -123,18 +127,21 @@ public class MessageController {
 		}
 	}
 
-	private void addKnownUser(@NonNull User user) {
-		User oldValue = this.knownUsers.put(user.getTelegramId(), user);
-		if (!user.equals(oldValue)) {
-			userService.add(user);
+	private User addKnownUser(@NonNull User user) {
+		User persistedUser = knownUsers.get(user.getTelegramId());
+		if (persistedUser == null) {
+			persistedUser = userService.add(user);
+			knownUsers.put(user.getTelegramId(), user);
 		}
+		return persistedUser;
 	}
 
-	private void cleanKnownUsers() {
-		this.knownUsers.clear();
-	}
-
-	private void removeKnownUser(String telegramId) {
-		this.knownUsers.remove(telegramId);
+	private Group addKnownGroup(@NonNull Group group) {
+		Group persistedGroup = knownGroups.get(group.getTelegramId());
+		if (persistedGroup == null) {
+			persistedGroup = groupService.add(group);
+			knownGroups.put(group.getTelegramId(), group);
+		}
+		return persistedGroup;
 	}
 }
