@@ -27,12 +27,13 @@ public class UserService {
 	}
 
 	public User add(User user) {
-		User alreadyPersistedUser = userRepository.findByTelegramId(user.getTelegramId());
-		if (alreadyPersistedUser == null) {
-			log.info("Inserted user={} in DB", user);
-			return userRepository.save(user);
+		Long id = user.getId();
+		User persistedUser = userRepository.save(user);
+		if (id == null) {
+			log.info("Inserted user={} in DB", persistedUser);
+		} else {
+			log.info("Updated user={} in DB", persistedUser);
 		}
-		log.debug("User already present in DB: user={}", user);
-		return alreadyPersistedUser;
+		return persistedUser;
 	}
 }

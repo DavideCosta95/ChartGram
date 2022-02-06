@@ -10,10 +10,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -130,8 +127,26 @@ public class MessageController {
 	private User addKnownUser(@NonNull User user) {
 		User persistedUser = knownUsers.get(user.getTelegramId());
 		if (persistedUser == null) {
+			log.info("Found new user={}", user);
 			persistedUser = userService.add(user);
-			knownUsers.put(user.getTelegramId(), user);
+			knownUsers.put(persistedUser.getTelegramId(), persistedUser);
+		} else {
+			boolean modified = false;
+			if (!Objects.equals(persistedUser.getTelegramFirstName(), user.getTelegramFirstName())) {
+				persistedUser.setTelegramFirstName(user.getTelegramFirstName());
+				modified = true;
+			}
+			if (!Objects.equals(persistedUser.getTelegramLastName(), user.getTelegramLastName())) {
+				persistedUser.setTelegramLastName(user.getTelegramLastName());
+				modified = true;
+			}
+			if (!Objects.equals(persistedUser.getTelegramUsername(), user.getTelegramUsername())) {
+				persistedUser.setTelegramUsername(user.getTelegramUsername());
+				modified = true;
+			}
+			if (modified) {
+				persistedUser = userService.add(persistedUser);
+			}
 		}
 		return persistedUser;
 	}
@@ -141,6 +156,11 @@ public class MessageController {
 		if (persistedGroup == null) {
 			persistedGroup = groupService.add(group);
 			knownGroups.put(group.getTelegramId(), group);
+		} else {
+			if (!Objects.equals(persistedGroup.getDescription(), group.getDescription())) {
+				persistedGroup.setDescription(group.getDescription());
+				persistedGroup = groupService.add(persistedGroup);
+			}
 		}
 		return persistedGroup;
 	}

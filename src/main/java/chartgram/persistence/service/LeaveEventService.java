@@ -25,7 +25,6 @@ public class LeaveEventService {
 		return result;
 	}
 
-	// TODO: gestire eventuale merge o null/exception
 	public LeaveEvent add(LeaveEvent leaveEvent) {
 		LeaveEvent alreadyPersistedLeaveEvent = leaveEventRepository.findByLeavingUser(leaveEvent.getLeavingUser());
 		if (alreadyPersistedLeaveEvent == null) {

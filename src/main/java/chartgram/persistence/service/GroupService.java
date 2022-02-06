@@ -26,12 +26,13 @@ public class GroupService {
 	}
 
 	public Group add(Group group) {
-		Group alreadyPersistedGroup = groupRepository.findByTelegramId(group.getTelegramId());
-		if (alreadyPersistedGroup == null) {
-			log.info("Inserted group={} in DB", group);
-			return groupRepository.save(group);
+		Long id = group.getId();
+		Group persistedGroup = groupRepository.save(group);
+		if (id == null) {
+			log.info("Inserted group={} in DB", persistedGroup);
+		} else {
+			log.info("Updated group={} in DB", persistedGroup);
 		}
-		log.debug("Group already present in DB: group={}", group);
-		return alreadyPersistedGroup;
+		return persistedGroup;
 	}
 }

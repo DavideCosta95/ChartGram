@@ -7,8 +7,6 @@ import lombok.NonNull;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-// TODO: vedere se i timestamp si aggiornano e se togliere @NonNull dalle entity usando il default del DB
-
 @Data
 @NoArgsConstructor
 @Entity(name = "users")
@@ -18,20 +16,20 @@ public class User {
 	@Column(name = "id")
 	private Long id;
 
-	@Column(name="telegram_id", nullable = false)
+	@Column(name = "telegram_id", nullable = false)
 	@NonNull
 	private String telegramId;
 
-	@Column(name="telegram_first_name")
+	@Column(name = "telegram_first_name")
 	private String telegramFirstName;
 
-	@Column(name="telegram_last_name")
+	@Column(name = "telegram_last_name")
 	private String telegramLastName;
 
-	@Column(name="telegram_username")
+	@Column(name = "telegram_username")
 	private String telegramUsername;
 
-	@Column(name="inserted_at", nullable = false)
+	@Column(name = "inserted_at", nullable = false)
 	@NonNull
 	private LocalDateTime insertedAt;
 
