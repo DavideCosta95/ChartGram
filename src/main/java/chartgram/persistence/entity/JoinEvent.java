@@ -22,9 +22,9 @@ public class JoinEvent {
 	private LocalDateTime joinedAt;
 
 	@ManyToOne
-	@JoinColumn(name = "added_user_id", nullable=false)
+	@JoinColumn(name = "joining_user_id", nullable=false)
 	@NonNull
-	private User addedUser;
+	private User joiningUser;
 
 	@ManyToOne
 	@JoinColumn(name = "adder_user_id", nullable=true)

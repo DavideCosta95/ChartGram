@@ -34,7 +34,7 @@ create table join_events
         constraint join_events_pk
             primary key,
     joined_at timestamp not null,
-    added_user_id bigint not null
+    joining_user_id bigint not null
         constraint join_events_users_id_fk
             references users
             on update cascade on delete cascade,

@@ -7,12 +7,13 @@ import lombok.NonNull;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+// TODO: vedere se i timestamp si aggiornano e se togliere @NonNull dalle entity usando il default del DB
+
 @Data
 @NoArgsConstructor
 @Entity(name = "users")
 public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@NonNull
 	@Id
 	@Column(name = "id")
 	private Long id;

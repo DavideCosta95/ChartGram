@@ -5,5 +5,5 @@ import chartgram.persistence.entity.User;
 import org.springframework.data.repository.CrudRepository;
 
 public interface JoinEventRepository extends CrudRepository<JoinEvent, Long> {
-	JoinEvent findByAddedUser(User addedUser);
+	JoinEvent findByJoiningUser(User addedUser);
 }

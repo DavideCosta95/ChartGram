@@ -8,7 +8,6 @@ import chartgram.exceptions.BotStartupException;
 import chartgram.model.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -33,9 +32,13 @@ public class TelegramBot extends TelegramLongPollingBot {
 	private final Configuration configuration;
 	private final Language language;
 	private final List<Consumer<Update>> onGroupMessageReceivedHandlers;
+	private final List<Consumer<Update>> onJoiningUserHandlers;
+	private final List<Consumer<Update>> onLeavingUserHandlers;
 
 	public TelegramBot(Configuration configuration, Localization localization) throws BotStartupException {
 		this.onGroupMessageReceivedHandlers = new ArrayList<>();
+		this.onJoiningUserHandlers = new ArrayList<>();
+		this.onLeavingUserHandlers = new ArrayList<>();
 		this.configuration = configuration;
 		String languageName = configuration.getLanguage();
 		this.language = localization.getLanguage(languageName);
@@ -64,41 +67,28 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 	@Override
 	public void onUpdateReceived(Update update) {
-		if (update.hasCallbackQuery()) {
-			handleCallbackQuery(update);
-			return;
-		}
-
 		Message message = update.getMessage();
 		if (message == null) {
 			return;
 		}
 
 		Chat chat = message.getChat();
-		// TODO: test
-		onGroupMessageReceivedHandlers.forEach(e -> e.accept(update));
 
 		if (chat.isGroupChat() || chat.isSuperGroupChat()) {
-			//onGroupMessageReceivedHandlers.forEach(e -> e.accept(update));
+			handleGroupMessage(update);
 		} else {
 			handlePrivateMessage(update);
 		}
 	}
 
-	private void handleCallbackQuery(Update update) {
-		// TODO
-	}
-
 	private void handlePrivateMessage(Update update) {
 		Message message = update.getMessage();
-		User sender = message.getFrom();
 
 		if (message.hasText()) {
 			handleTextUpdate(update);
 		} else {
 			handleNonTextUpdate(update);
 		}
-
 	}
 
 	private void handleGroupMessage(Update update) {
@@ -119,24 +109,17 @@ public class TelegramBot extends TelegramLongPollingBot {
 		if (Boolean.TRUE.equals(sender.getIsBot())) {
 			return;
 		}
-
-		TelegramUser telegramUser = new TelegramUser(sender.getId(), sender.getFirstName(), sender.getLastName(), sender.getUserName());
-
-		// TODO
-		// addSeenUser(telegramUser);
+		onGroupMessageReceivedHandlers.forEach(e -> e.accept(update));
 	}
-
-	private void addSeenUser(TelegramUser telegramUser) {
-		// TODO
-	}
-
 
 	private void handleJoinUpdate(Update update) {
-		// TODO
+		log.info("Join update received={}", update);
+		onJoiningUserHandlers.forEach(e -> e.accept(update));
 	}
 
 	private void handleLeaveUpdate(Update update) {
-		// TODO
+		log.info("Leave update received={}", update);
+		onLeavingUserHandlers.forEach(e -> e.accept(update));
 	}
 
 	private void handleNonTextUpdate(Update update) {
@@ -150,7 +133,6 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 	private void handleTextUpdate(Update update) {
 		User sender = update.getMessage().getFrom();
-		TelegramUser telegramUser = new TelegramUser(sender.getId(), sender.getFirstName(), sender.getLastName(), sender.getUserName());
 		Chat chat = update.getMessage().getChat();
 		String receivedText = update.getMessage().getText();
 		log.info("Sender={} - received text={}", sender, receivedText);
@@ -169,12 +151,6 @@ public class TelegramBot extends TelegramLongPollingBot {
 		String receivedText = receivedMessage.getText();
 		// TODO
 		//commandFactory.getCommandByString(receivedText).run(update);
-	}
-
-	public void answerCallbackQuery(String callbackQueryId) {
-		AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery();
-		answerCallbackQuery.setCallbackQueryId(callbackQueryId);
-		executeChatAction(answerCallbackQuery);
 	}
 
 	public Message sendMessageToSingleChat(String textToSend, String recipientId) {
@@ -299,9 +275,24 @@ public class TelegramBot extends TelegramLongPollingBot {
 		this.onGroupMessageReceivedHandlers.add(handler);
 	}
 
-	// TODO: vedere equals
-	public void removeOnGroupMessageReceivedHandler(Consumer<Update> handler) {
-		this.onGroupMessageReceivedHandlers.remove(handler);
+	public void removeOnGroupMessageReceivedHandlers() {
+		this.onGroupMessageReceivedHandlers.clear();
+	}
+
+	public void addOnJoiningUserHandler(Consumer<Update> handler) {
+		this.onJoiningUserHandlers.add(handler);
+	}
+
+	public void removeOnJoiningUserHandlers() {
+		this.onJoiningUserHandlers.clear();
+	}
+
+	public void addOnLeavingUserHandler(Consumer<Update> handler) {
+		this.onLeavingUserHandlers.add(handler);
+	}
+
+	public void removeOnLeavingUserHandlers() {
+		this.onLeavingUserHandlers.clear();
 	}
 
 	public String getBotName() {
