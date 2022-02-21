@@ -1,4 +1,4 @@
-package chartgram;
+package chartgram.telegram;
 
 import chartgram.persistence.entity.*;
 import chartgram.persistence.service.*;
@@ -60,12 +60,14 @@ public class MessageController {
 		Group group = new Group(update.getMessage().getChatId().toString(), update.getMessage().getChat().getDescription(), now);
 		group = addKnownGroup(group);
 
-		Message message = new Message(now, user, group, text, hasMedia(incomingMessage));
+		int messageTypeId = getMessageType(incomingMessage).getId();
+		Message message = new Message(now, user, group, text, messageTypeId);
 		messageService.add(message);
 	}
 
-	private boolean hasMedia(org.telegram.telegrambots.meta.api.objects.Message message) {
-		return message.hasVoice()
+	private MessageType getMessageType(org.telegram.telegrambots.meta.api.objects.Message message) {
+		boolean hasMedia =
+				message.hasVoice()
 				|| message.hasAnimation()
 				|| message.hasAudio()
 				|| message.hasContact()
@@ -79,6 +81,26 @@ public class MessageController {
 				|| message.hasPassportData()
 				|| message.hasVideo()
 				|| message.hasVideoNote();
+
+		if (!hasMedia) {
+			return MessageType.TEXT;
+		}
+		if (message.hasVoice()) {
+			return MessageType.AUDIO;
+		}
+		if (message.hasPhoto()) {
+			return MessageType.PHOTO;
+		}
+		if (message.hasSticker()) {
+			return MessageType.STICKER;
+		}
+		if (message.hasVideo()) {
+			return MessageType.VIDEO;
+		}
+		if (message.hasAnimation()) {
+			return MessageType.GIF;
+		}
+		return MessageType.OTHER;
 	}
 
 	private void handleJoinUpdate(Update update) {

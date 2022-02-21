@@ -31,14 +31,14 @@ public class Message {
 	@Column(name="text")
 	private String text;
 
-	@Column(name = "has_media", nullable = false)
-	private Boolean hasMedia;
+	@Column(name = "type", nullable = false)
+	private Integer type;
 
-	public Message(@NonNull LocalDateTime sentAt, User sender, Group group, String text, Boolean hasMedia) {
+	public Message(@NonNull LocalDateTime sentAt, User sender, Group group, String text, Integer type) {
 		this.sentAt = sentAt;
 		this.sender = sender;
 		this.group = group;
 		this.text = text;
-		this.hasMedia = hasMedia;
+		this.type = type;
 	}
 }

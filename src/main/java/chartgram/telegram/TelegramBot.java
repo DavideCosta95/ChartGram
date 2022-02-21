@@ -109,6 +109,8 @@ public class TelegramBot extends TelegramLongPollingBot {
 		if (Boolean.TRUE.equals(sender.getIsBot())) {
 			return;
 		}
+
+		// TODO: gestire comandi in gruppo
 		onGroupMessageReceivedHandlers.forEach(e -> e.accept(update));
 	}
 

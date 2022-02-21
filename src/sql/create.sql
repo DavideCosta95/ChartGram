@@ -62,6 +62,18 @@ create table leave_events
 );
 
 
+create table message_types
+(
+    id bigserial
+        constraint message_types_pk
+            primary key,
+    type varchar not null
+);
+
+create unique index message_types_type_uindex
+    on message_types (type);
+
+
 create table messages
 (
     id bigserial
@@ -77,5 +89,8 @@ create table messages
             references groups
             on update cascade on delete cascade,
     text varchar,
-    has_media bool not null
+    type bigint not null
+        constraint messages_message_types_id_fk
+            references message_types
+            on update cascade on delete cascade
 );
