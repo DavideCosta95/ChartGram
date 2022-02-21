@@ -31,7 +31,7 @@ repositories {
 
 dependencies {
     testImplementation 'junit:junit:4.13.2'
-    implementation 'org.postgresql:postgresql:42.3.1'
+    implementation 'org.postgresql:postgresql:42.3.2'
     implementation 'org.telegram:telegrambots:5.4.0.1'
     implementation 'org.jfree:jfreechart:1.5.3'
 
@@ -40,5 +40,5 @@ dependencies {
 
     implementation 'ch.qos.logback:logback-classic:1.2.10'
     implementation 'ch.qos.logback:logback-core:1.2.10'
-    implementation 'org.slf4j:slf4j-api:1.7.33'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
 }
