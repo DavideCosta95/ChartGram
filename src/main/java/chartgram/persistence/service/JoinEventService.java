@@ -20,7 +20,7 @@ public class JoinEventService {
 		this.joinEventRepository = joinEventRepository;
 	}
 
-	public List<JoinEvent> list() {
+	public List<JoinEvent> getAll() {
 		List<JoinEvent> result = new ArrayList<>();
 		joinEventRepository.findAll().forEach(result::add);
 		return result;

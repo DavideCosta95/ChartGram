@@ -19,7 +19,7 @@ public class MessageService {
 		this.messageRepository = messageRepository;
 	}
 
-	public List<Message> list() {
+	public List<Message> getAll() {
 		List<Message> result = new ArrayList<>();
 		messageRepository.findAll().forEach(result::add);
 		return result;

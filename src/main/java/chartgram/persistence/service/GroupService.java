@@ -19,7 +19,7 @@ public class GroupService {
 		this.groupRepository = groupRepository;
 	}
 
-	public List<Group> list() {
+	public List<Group> getAll() {
 		List<Group> result = new ArrayList<>();
 		groupRepository.findAll().forEach(result::add);
 		return result;

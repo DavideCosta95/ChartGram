@@ -19,7 +19,7 @@ public class LeaveEventService {
 		this.leaveEventRepository = leaveEventRepository;
 	}
 
-	public List<LeaveEvent> list() {
+	public List<LeaveEvent> getAll() {
 		List<LeaveEvent> result = new ArrayList<>();
 		leaveEventRepository.findAll().forEach(result::add);
 		return result;
