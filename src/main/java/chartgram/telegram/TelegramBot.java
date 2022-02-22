@@ -23,7 +23,10 @@ import java.util.*;
 import java.util.function.Consumer;
 
 @Slf4j
-public class TelegramBot extends TelegramLongPollingBot {
+public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot {
+
+	public static final ITelegramBot Null = new NullTelegramBot();
+
 	private String botName;
 	private String botUsername;
 	private String botToken;

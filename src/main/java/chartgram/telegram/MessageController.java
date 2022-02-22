@@ -2,7 +2,6 @@ package chartgram.telegram;
 
 import chartgram.persistence.entity.*;
 import chartgram.persistence.service.*;
-import chartgram.telegram.TelegramBot;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class MessageController {
-	private final TelegramBot bot;
+	private final ITelegramBot bot;
 	private final UserService userService;
 	private final MessageService messageService;
 	private final GroupService groupService;
@@ -29,7 +28,7 @@ public class MessageController {
 	private Map<String, Group> knownGroups;
 
 	@Autowired
-	private MessageController(TelegramBot bot, UserService userService, MessageService messageService, GroupService groupService, JoinEventService joinEventService, LeaveEventService leaveEventService) {
+	private MessageController(ITelegramBot bot, UserService userService, MessageService messageService, GroupService groupService, JoinEventService joinEventService, LeaveEventService leaveEventService) {
 		this.knownUsers = new HashMap<>();
 		this.knownGroups = new HashMap<>();
 		this.bot = bot;
@@ -44,8 +43,8 @@ public class MessageController {
 		bot.addOnGroupMessageReceivedHandler(this::handleGroupMessage);
 		bot.addOnJoiningUserHandler(this::handleJoinUpdate);
 		bot.addOnLeavingUserHandler(this::handleLeaveUpdate);
-		knownUsers = userService.list().stream().collect(Collectors.toMap(User::getTelegramId, Function.identity()));
-		knownGroups = groupService.list().stream().collect(Collectors.toMap(Group::getTelegramId, Function.identity()));
+		knownUsers = userService.getAll().stream().collect(Collectors.toMap(User::getTelegramId, Function.identity()));
+		knownGroups = groupService.getAll().stream().collect(Collectors.toMap(Group::getTelegramId, Function.identity()));
 	}
 
 	private void handleGroupMessage(Update update) {

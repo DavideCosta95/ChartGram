@@ -13,5 +13,6 @@
         }
       }
     }
-  }
+  },
+  "telegram_bot_enabled": false
 }
