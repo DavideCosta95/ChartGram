@@ -41,6 +41,10 @@ create table join_events
     adder_user_id bigint
         constraint join_events_users_id_fk_2
             references users
+            on update cascade on delete cascade,
+    group_id bigint not null
+        constraint join_events_users_id_fk_3
+            references groups
             on update cascade on delete cascade
 );
 
@@ -58,6 +62,10 @@ create table leave_events
     remover_user_id bigint
         constraint leave_events_users_id_fk_2
             references users
+            on update cascade on delete cascade,
+    group_id bigint not null
+        constraint leave_events_users_id_fk_3
+            references groups
             on update cascade on delete cascade
 );
 
@@ -93,4 +101,17 @@ create table messages
         constraint messages_message_types_id_fk
             references message_types
             on update cascade on delete cascade
+);
+
+create table users_in_groups
+(
+    user_id bigint NOT NULL
+        constraint users_in_groups_users_id_fk
+            references users
+            on update cascade on delete cascade,
+    group_id bigint NOT NULL
+        constraint users_in_groups_groups_id_fk
+            references groups
+            on update cascade on delete cascade,
+    PRIMARY KEY (user_id, group_id)
 );
