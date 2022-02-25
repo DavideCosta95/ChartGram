@@ -4,6 +4,7 @@ import chartgram.App;
 import chartgram.config.Configuration;
 import chartgram.exceptions.BotStartupException;
 import chartgram.model.Pair;
+import chartgram.telegram.model.ITelegramBot;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;

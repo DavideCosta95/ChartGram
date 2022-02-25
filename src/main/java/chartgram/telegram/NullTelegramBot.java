@@ -1,6 +1,7 @@
 package chartgram.telegram;
 
 import chartgram.model.Pair;
+import chartgram.telegram.model.ITelegramBot;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;

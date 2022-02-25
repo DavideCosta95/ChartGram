@@ -1,4 +1,4 @@
-package chartgram.telegram;
+package chartgram.telegram.model;
 
 public enum MessageType {
 	TEXT(1),

@@ -1,4 +1,4 @@
-package chartgram.telegram;
+package chartgram.telegram.model;
 
 import chartgram.model.Pair;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;

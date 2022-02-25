@@ -6,6 +6,8 @@ import chartgram.config.Localization;
 import chartgram.persistence.entity.*;
 import chartgram.persistence.service.*;
 import chartgram.telegram.model.Command;
+import chartgram.telegram.model.ITelegramBot;
+import chartgram.telegram.model.MessageType;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -21,19 +23,14 @@ import java.util.stream.Collectors;
 public class TelegramController {
 	private final ITelegramBot bot;
 	private final Language language;
-	private final UserService userService;
-	private final MessageService messageService;
-	private final GroupService groupService;
-	private final JoinEventService joinEventService;
-	private final LeaveEventService leaveEventService;
+	private final ServicesWrapper servicesWrapper;
 	private final Configuration configuration;
 
 	private Map<String, User> knownUsers;
 	private Map<String, Group> knownGroups;
 	private final Map<UUID, Long> groupAccessAuthorizations;
 
-	public TelegramController(Configuration configuration, ITelegramBot bot, Localization localization, UserService userService,
-							   MessageService messageService, GroupService groupService, JoinEventService joinEventService, LeaveEventService leaveEventService) {
+	public TelegramController(Configuration configuration, ITelegramBot bot, Localization localization, ServicesWrapper servicesWrapper) {
 		this.knownUsers = new HashMap<>();
 		this.knownGroups = new HashMap<>();
 		this.groupAccessAuthorizations = new HashMap<>();
@@ -41,11 +38,7 @@ public class TelegramController {
 		this.configuration = configuration;
 		String languageName = configuration.getLanguage();
 		this.language = localization.getLanguage(languageName);
-		this.userService = userService;
-		this.messageService = messageService;
-		this.groupService = groupService;
-		this.joinEventService = joinEventService;
-		this.leaveEventService = leaveEventService;
+		this.servicesWrapper = servicesWrapper;
 	}
 
 	public void startup() {
@@ -53,8 +46,8 @@ public class TelegramController {
 		bot.addOnPrivateMessageReceivedHandler(this::handlePrivateMessage);
 		bot.addOnJoiningUserHandler(this::handleJoinUpdate);
 		bot.addOnLeavingUserHandler(this::handleLeaveUpdate);
-		knownUsers = userService.getAll().stream().collect(Collectors.toMap(User::getTelegramId, Function.identity()));
-		knownGroups = groupService.getAll().stream().collect(Collectors.toMap(Group::getTelegramId, Function.identity()));
+		knownUsers = servicesWrapper.getUserService().getAll().stream().collect(Collectors.toMap(User::getTelegramId, Function.identity()));
+		knownGroups = servicesWrapper.getGroupService().getAll().stream().collect(Collectors.toMap(Group::getTelegramId, Function.identity()));
 	}
 
 	private void handleGroupMessage(Update update) {
@@ -76,7 +69,7 @@ public class TelegramController {
 
 		int messageTypeId = getMessageType(incomingMessage).getId();
 		Message message = new Message(now, user, group, text, messageTypeId);
-		messageService.add(message);
+		servicesWrapper.getMessageService().add(message);
 
 		if (incomingMessage.isCommand()) {
 			Command command = getCommandByString(text);
@@ -235,7 +228,7 @@ public class TelegramController {
 					}
 					joinEvents.add(currentJoinEvent);
 				});
-		joinEventService.addAll(joinEvents);
+		servicesWrapper.getJoinEventService().addAll(joinEvents);
 	}
 
 	private void handleLeaveUpdate(Update update) {
@@ -253,7 +246,7 @@ public class TelegramController {
 				User removerUser = new User(sender.getId().toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName(), now);
 				leaveEvent.setRemoverUser(removerUser);
 			}
-			leaveEventService.add(leaveEvent);
+			servicesWrapper.getLeaveEventService().add(leaveEvent);
 		}
 	}
 
@@ -262,7 +255,7 @@ public class TelegramController {
 		User persistedUser = knownUsers.get(user.getTelegramId());
 		if (persistedUser == null) {
 			log.info("Found new user={}", user);
-			persistedUser = userService.add(user);
+			persistedUser = servicesWrapper.getUserService().add(user);
 			knownUsers.put(persistedUser.getTelegramId(), persistedUser);
 		} else {
 			boolean modified = false;
@@ -279,7 +272,7 @@ public class TelegramController {
 				modified = true;
 			}
 			if (modified) {
-				persistedUser = userService.add(persistedUser);
+				persistedUser = servicesWrapper.getUserService().add(persistedUser);
 			}
 		}
 		return persistedUser;
@@ -288,12 +281,12 @@ public class TelegramController {
 	private Group addKnownGroup(@NonNull Group group) {
 		Group persistedGroup = knownGroups.get(group.getTelegramId());
 		if (persistedGroup == null) {
-			persistedGroup = groupService.add(group);
+			persistedGroup = servicesWrapper.getGroupService().add(group);
 			knownGroups.put(group.getTelegramId(), group);
 		} else {
 			if (!Objects.equals(persistedGroup.getDescription(), group.getDescription())) {
 				persistedGroup.setDescription(group.getDescription());
-				persistedGroup = groupService.add(persistedGroup);
+				persistedGroup = servicesWrapper.getGroupService().add(persistedGroup);
 			}
 		}
 		return persistedGroup;

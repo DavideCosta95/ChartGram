@@ -1,4 +1,4 @@
-package chartgram.telegram;
+package chartgram.telegram.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
