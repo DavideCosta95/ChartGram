@@ -22,10 +22,29 @@ public class Configuration {
 	@NonNull
 	private BotConfiguration botConfiguration;
 
+	@JsonProperty("webapp")
+	@NonNull
+	private WebappConfiguration webappConfiguration;
+
+	@Data
+	@NoArgsConstructor
+	public static class WebappConfiguration {
+		@JsonProperty("base_url")
+		@NonNull
+		private String baseUrl;
+
+		@JsonProperty("port")
+		@NonNull
+		private Integer port;
+	}
 
 	@Data
 	@NoArgsConstructor
 	public static class BotConfiguration {
+		@JsonProperty("enabled")
+		@NonNull
+		private Boolean enabled;
+
 		@JsonProperty("name")
 		@NonNull
 		private String name;
@@ -46,19 +65,11 @@ public class Configuration {
 		@NonNull
 		private String helpCommand;
 
-		@JsonProperty("admin_panel_command")
-		@NonNull
-		private String adminPanelCommand;
-
 		@JsonProperty("ignore_non_commands_messages")
 		private Boolean ignoreNonCommandsMessages;
 
 		@JsonProperty("developers_ids")
 		@NonNull
 		private List<Long> developersIds;
-
-		@JsonProperty("owners_ids")
-		@NonNull
-		private List<Long> ownersIds;
 	}
 }

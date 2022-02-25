@@ -2,18 +2,19 @@
   "language": "italian",
   "timezone": "Europe/Rome",
   "bot": {
+    "enabled": true,
     "name": "ChartGram",
     "username": "ChartGramBot",
     "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     "start_command": "/start",
     "help_command": "/help",
-    "admin_panel_command": "/admin",
     "ignore_non_commands_messages": false,
     "developers_ids": [
       123456789
-    ],
-    "owners_ids": [
-      123456789
     ]
+  },
+  "webapp": {
+    "base_url": "http://localhost",
+    "port": 8080
   }
 }
