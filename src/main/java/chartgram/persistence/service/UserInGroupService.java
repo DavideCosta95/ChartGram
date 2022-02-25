@@ -1,5 +1,6 @@
 package chartgram.persistence.service;
 
+import chartgram.persistence.entity.Group;
 import chartgram.persistence.entity.User;
 import chartgram.persistence.entity.UserInGroup;
 import chartgram.persistence.repository.UserInGroupRepository;
@@ -20,9 +21,19 @@ public class UserInGroupService {
 		this.userInGroupRepository = userInGroupRepository;
 	}
 
-	public List<User> getUsersByGroupId(String groupId) {
+	public List<User> getUsersByGroupTelegramId(String groupId) {
 		return userInGroupRepository.getAllByGroupTelegramId(groupId).stream()
 				.map(UserInGroup::getUser)
 				.collect(Collectors.toList());
+	}
+
+	public List<Group> getGroupsByUserTelegramId(String userId) {
+		return userInGroupRepository.getAllByUserTelegramId(userId).stream()
+				.map(UserInGroup::getGroup)
+				.collect(Collectors.toList());
+	}
+
+	public UserInGroup add(UserInGroup userInGroup) {
+		return userInGroupRepository.save(userInGroup);
 	}
 }

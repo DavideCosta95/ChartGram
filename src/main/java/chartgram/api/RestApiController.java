@@ -86,7 +86,7 @@ public class RestApiController {
 	@GetMapping("/{groupId}/leave-events")
 	public List<LeaveEvent> getAllLeaveEvents(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
 		if (groupId.equals(authorizedGroup)) {
-			return leaveEventService.getAllByGroup(groupId);
+			return leaveEventService.getAllByGroupTelegramId(groupId);
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
 			response.setStatus(403);
@@ -97,7 +97,7 @@ public class RestApiController {
 	@GetMapping("/{groupId}/users")
 	public List<User> getAllUsers(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
 		if (groupId.equals(authorizedGroup)) {
-			return userInGroupService.getUsersByGroupId(groupId);
+			return userInGroupService.getUsersByGroupTelegramId(groupId);
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
 			response.setStatus(403);

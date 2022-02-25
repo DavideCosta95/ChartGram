@@ -25,7 +25,7 @@ public class LeaveEventService {
 		return result;
 	}
 
-	public List<LeaveEvent> getAllByGroup(String groupId) {
+	public List<LeaveEvent> getAllByGroupTelegramId(String groupId) {
 		return leaveEventRepository.getAllByGroupTelegramId(groupId);
 	}
 
