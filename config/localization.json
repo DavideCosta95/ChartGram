@@ -2,7 +2,20 @@
   "languages": [
     {
       "italian": {
-        "non_command_text": "Usa /help per l'elenco dei comandi disponibili."
+        "non_command_text": "Usa /help per l'elenco dei comandi disponibili.",
+        "private_command_not_allowed_text": "Questo comando deve essere usato in un gruppo.",
+        "unknown_command_text": "Comando non riconosciuto.",
+        "must_be_admin_text": "Devi essere un amministratore del gruppo per usare questo comando.",
+        "link_sent_in_pvt_text": "Il link ti è stato inviato in privato."
+      }
+    },
+    {
+      "english": {
+        "non_command_text": "Use /help for available commands list.",
+        "private_command_not_allowed_text": "This command must be used in a group.",
+        "unknown_command_text": "Command not recognized.",
+        "must_be_admin_text": "You must be an administrator of the group to use this command.",
+        "link_sent_in_pvt_text": "Link sent in private message."
       }
     }
   ]
