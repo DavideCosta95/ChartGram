@@ -210,9 +210,11 @@ public class TelegramController {
 
 	private void handleJoinUpdate(Update update) {
 		org.telegram.telegrambots.meta.api.objects.User sender = update.getMessage().getFrom();
-		// TODO: aggiungere in join e leave il gruppo a cui sono relativi
-		// TODO: aggiungere ai gruppi noti e agli utenti noti anche quelli visti da join/leave
+		String groupId = update.getMessage().getChatId().toString();
 		LocalDateTime now = LocalDateTime.now();
+
+		Group group = new Group(groupId, update.getMessage().getChat().getDescription(), now);
+		final Group persistedGroup = addKnownGroup(group);
 
 		List<JoinEvent> joinEvents = new ArrayList<>(update.getMessage().getNewChatMembers().size());
 
@@ -222,13 +224,15 @@ public class TelegramController {
 				.filter(Predicate.not(org.telegram.telegrambots.meta.api.objects.User::getIsBot))
 				.map(u -> new User(u.getId().toString(), u.getFirstName(), u.getLastName(), u.getUserName(), now))
 				.forEach(u -> {
+					User persistedJoiningUser = addKnownUser(u, persistedGroup);
 					JoinEvent currentJoinEvent = new JoinEvent();
 					currentJoinEvent.setJoinedAt(now);
-					currentJoinEvent.setJoiningUser(u);
-					if (!u.getTelegramId().equals(sender.getId().toString())) {
-						// TODO: usare entity da DB (ci sono nella mappa locale)
+					currentJoinEvent.setJoiningUser(persistedJoiningUser);
+					currentJoinEvent.setGroup(persistedGroup);
+					if (!persistedJoiningUser.getTelegramId().equals(sender.getId().toString())) {
 						User adder = new User(sender.getId().toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName(), now);
-						currentJoinEvent.setAdderUser(adder);
+						User persistedAdderUser = addKnownUser(adder, persistedGroup);
+						currentJoinEvent.setAdderUser(persistedAdderUser);
 					}
 					joinEvents.add(currentJoinEvent);
 				});
@@ -237,18 +241,25 @@ public class TelegramController {
 
 	private void handleLeaveUpdate(Update update) {
 		org.telegram.telegrambots.meta.api.objects.User sender = update.getMessage().getFrom();
+		String groupId = update.getMessage().getChatId().toString();
 		LocalDateTime now = LocalDateTime.now();
+
+		Group group = new Group(groupId, update.getMessage().getChat().getDescription(), now);
+		group = addKnownGroup(group);
 
 		org.telegram.telegrambots.meta.api.objects.User leavingUser = update.getMessage().getLeftChatMember();
 		if (!leavingUser.getIsBot()) {
 			User user = new User(leavingUser.getId().toString(), leavingUser.getFirstName(), leavingUser.getLastName(), leavingUser.getUserName(), now);
+			User persistedLeavingUser = addKnownUser(user, group);
 			LeaveEvent leaveEvent = new LeaveEvent();
 			leaveEvent.setLeavingAt(now);
-			leaveEvent.setLeavingUser(user);
+			leaveEvent.setGroup(group);
+			leaveEvent.setLeavingUser(persistedLeavingUser);
 
 			if (!sender.getId().equals(user.getId())) {
 				User removerUser = new User(sender.getId().toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName(), now);
-				leaveEvent.setRemoverUser(removerUser);
+				User persistedRemoverUser = addKnownUser(removerUser, group);
+				leaveEvent.setRemoverUser(persistedRemoverUser);
 			}
 			servicesWrapper.getLeaveEventService().add(leaveEvent);
 		}
