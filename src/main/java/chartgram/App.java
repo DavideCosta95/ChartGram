@@ -1,7 +1,7 @@
 package chartgram;
 
 import chartgram.config.Configuration;
-import chartgram.telegram.MessageController;
+import chartgram.telegram.TelegramController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -25,7 +25,7 @@ public class App implements ApplicationRunner {
     public void run(ApplicationArguments arg0) throws Exception {
         Configuration configuration = context.getBean(Configuration.class);
         TimeZone.setDefault(TimeZone.getTimeZone(configuration.getTimezone()));
-        context.getBean(MessageController.class).startup();
+        context.getBean(TelegramController.class).startup();
     }
 
     @Autowired

@@ -2,18 +2,18 @@ package chartgram.telegram;
 
 import chartgram.App;
 import chartgram.config.Configuration;
-import chartgram.config.Language;
-import chartgram.config.Localization;
 import chartgram.exceptions.BotStartupException;
 import chartgram.model.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatAdministrators;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -21,6 +21,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot {
@@ -33,18 +34,17 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 	private Long botId;
 
 	private final Configuration configuration;
-	private final Language language;
 	private final List<Consumer<Update>> onGroupMessageReceivedHandlers;
+	private final List<Consumer<Update>> onPrivateMessageReceivedHandlers;
 	private final List<Consumer<Update>> onJoiningUserHandlers;
 	private final List<Consumer<Update>> onLeavingUserHandlers;
 
-	public TelegramBot(Configuration configuration, Localization localization) throws BotStartupException {
+	public TelegramBot(Configuration configuration) throws BotStartupException {
 		this.onGroupMessageReceivedHandlers = new ArrayList<>();
+		this.onPrivateMessageReceivedHandlers = new ArrayList<>();
 		this.onJoiningUserHandlers = new ArrayList<>();
 		this.onLeavingUserHandlers = new ArrayList<>();
 		this.configuration = configuration;
-		String languageName = configuration.getLanguage();
-		this.language = localization.getLanguage(languageName);
 		loadConfiguration();
 		startup();
 	}
@@ -85,13 +85,7 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 	}
 
 	private void handlePrivateMessage(Update update) {
-		Message message = update.getMessage();
-
-		if (message.hasText()) {
-			handleTextUpdate(update);
-		} else {
-			handleNonTextUpdate(update);
-		}
+		onPrivateMessageReceivedHandlers.forEach(e -> e.accept(update));
 	}
 
 	private void handleGroupMessage(Update update) {
@@ -106,15 +100,20 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 			handleJoinUpdate(update);
 			return;
 		}
-
-		User sender = message.getFrom();
-
-		if (Boolean.TRUE.equals(sender.getIsBot())) {
-			return;
-		}
-
-		// TODO: gestire comandi in gruppo
 		onGroupMessageReceivedHandlers.forEach(e -> e.accept(update));
+	}
+
+	public List<Long> getAGroupAdmins(Long groupId) {
+		GetChatAdministrators getChatAdministrators = new GetChatAdministrators();
+		getChatAdministrators.setChatId(groupId.toString());
+		List<ChatMember> adminsList = executeChatAction(getChatAdministrators);
+		if (adminsList != null) {
+			return adminsList.stream()
+					.map(ChatMember::getUser)
+					.map(User::getId)
+					.collect(Collectors.toList());
+		}
+		return Collections.emptyList();
 	}
 
 	private void handleJoinUpdate(Update update) {
@@ -125,37 +124,6 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 	private void handleLeaveUpdate(Update update) {
 		log.info("Leave update received={}", update);
 		onLeavingUserHandlers.forEach(e -> e.accept(update));
-	}
-
-	private void handleNonTextUpdate(Update update) {
-		Chat chat = update.getMessage().getChat();
-		boolean ignoreNonCommandMessages = configuration.getBotConfiguration().getIgnoreNonCommandsMessages();
-
-		if (!ignoreNonCommandMessages) {
-			sendMessageToSingleChat(language.getNonCommandText(), chat.getId().toString());
-		}
-	}
-
-	private void handleTextUpdate(Update update) {
-		User sender = update.getMessage().getFrom();
-		Chat chat = update.getMessage().getChat();
-		String receivedText = update.getMessage().getText();
-		log.info("Sender={} - received text={}", sender, receivedText);
-
-		boolean ignoreNonCommandMessages = configuration.getBotConfiguration().getIgnoreNonCommandsMessages();
-
-		if (receivedText.startsWith("/")) {
-			handleCommand(update);
-		} else if (Boolean.FALSE.equals(ignoreNonCommandMessages)) {
-			sendMessageToSingleChat(language.getNonCommandText(), chat.getId().toString());
-		}
-	}
-
-	private void handleCommand(Update update) {
-		Message receivedMessage = update.getMessage();
-		String receivedText = receivedMessage.getText();
-		// TODO
-		//commandFactory.getCommandByString(receivedText).run(update);
 	}
 
 	public Message sendMessageToSingleChat(String textToSend, String recipientId) {
@@ -172,11 +140,6 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 	public void sendMessageToAllDevelopers(String textToSend) {
 		log.debug("Sent message to all developers={}", textToSend);
 		sendMessageToMultipleUsers(textToSend, configuration.getBotConfiguration().getDevelopersIds());
-	}
-
-	public void sendMessageToAllOwners(String textToSend) {
-		log.debug("Sent message to all owners={}", textToSend);
-		sendMessageToMultipleUsers(textToSend, configuration.getBotConfiguration().getOwnersIds());
 	}
 
 	public void sendMessageToMultipleUsers(String textToSend, List<Long> usersIds) {
@@ -282,6 +245,14 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 
 	public void removeOnGroupMessageReceivedHandlers() {
 		this.onGroupMessageReceivedHandlers.clear();
+	}
+
+	public void addOnPrivateMessageReceivedHandler(Consumer<Update> handler) {
+		this.onPrivateMessageReceivedHandlers.add(handler);
+	}
+
+	public void removeOnPrivateMessageReceivedHandlers() {
+		this.onPrivateMessageReceivedHandlers.clear();
 	}
 
 	public void addOnJoiningUserHandler(Consumer<Update> handler) {

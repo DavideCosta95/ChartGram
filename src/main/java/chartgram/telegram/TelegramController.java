@@ -1,11 +1,16 @@
 package chartgram.telegram;
 
+import chartgram.config.Configuration;
+import chartgram.config.Language;
+import chartgram.config.Localization;
 import chartgram.persistence.entity.*;
 import chartgram.persistence.service.*;
+import chartgram.telegram.model.Command;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.time.LocalDateTime;
@@ -16,22 +21,30 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class MessageController {
+public class TelegramController {
 	private final ITelegramBot bot;
+	private final Language language;
 	private final UserService userService;
 	private final MessageService messageService;
 	private final GroupService groupService;
 	private final JoinEventService joinEventService;
 	private final LeaveEventService leaveEventService;
+	private final Configuration configuration;
 
 	private Map<String, User> knownUsers;
 	private Map<String, Group> knownGroups;
+	private final Map<UUID, Long> groupAccessAuthorizations;
 
 	@Autowired
-	private MessageController(ITelegramBot bot, UserService userService, MessageService messageService, GroupService groupService, JoinEventService joinEventService, LeaveEventService leaveEventService) {
+	private TelegramController(Configuration configuration, ITelegramBot bot, Localization localization, UserService userService,
+							   MessageService messageService, GroupService groupService, JoinEventService joinEventService, LeaveEventService leaveEventService) {
 		this.knownUsers = new HashMap<>();
 		this.knownGroups = new HashMap<>();
+		this.groupAccessAuthorizations = new HashMap<>();
 		this.bot = bot;
+		this.configuration = configuration;
+		String languageName = configuration.getLanguage();
+		this.language = localization.getLanguage(languageName);
 		this.userService = userService;
 		this.messageService = messageService;
 		this.groupService = groupService;
@@ -41,6 +54,7 @@ public class MessageController {
 
 	public void startup() {
 		bot.addOnGroupMessageReceivedHandler(this::handleGroupMessage);
+		bot.addOnPrivateMessageReceivedHandler(this::handlePrivateMessage);
 		bot.addOnJoiningUserHandler(this::handleJoinUpdate);
 		bot.addOnLeavingUserHandler(this::handleLeaveUpdate);
 		knownUsers = userService.getAll().stream().collect(Collectors.toMap(User::getTelegramId, Function.identity()));
@@ -48,10 +62,15 @@ public class MessageController {
 	}
 
 	private void handleGroupMessage(Update update) {
+		org.telegram.telegrambots.meta.api.objects.User sender = update.getMessage().getFrom();
+
+		if (Boolean.TRUE.equals(sender.getIsBot())) {
+			return;
+		}
+
 		LocalDateTime now = LocalDateTime.now();
 		org.telegram.telegrambots.meta.api.objects.Message incomingMessage = update.getMessage();
 		String text = incomingMessage.getText();
-		org.telegram.telegrambots.meta.api.objects.User sender = incomingMessage.getFrom();
 
 		User user = new User(sender.getId().toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName(), now);
 		user = addKnownUser(user);
@@ -62,6 +81,101 @@ public class MessageController {
 		int messageTypeId = getMessageType(incomingMessage).getId();
 		Message message = new Message(now, user, group, text, messageTypeId);
 		messageService.add(message);
+
+		if (incomingMessage.isCommand()) {
+			Command command = getCommandByString(text);
+			handleGroupCommand(update, command);
+		}
+	}
+
+	private Command getCommandByString(String text) {
+		// TODO: migliorare con factory
+		if (text.contains("/analytics")) {
+			return Command.ANALYTICS;
+		}
+		return Command.UNKNOWN;
+	}
+
+	private void handleGroupCommand(Update update, Command command) {
+		Long senderId = update.getMessage().getFrom().getId();
+		Long groupId = update.getMessage().getChatId();
+		boolean isGroupAdmin = bot.getAGroupAdmins(groupId).contains(senderId);
+
+		if (isGroupAdmin) {
+			switch (command) {
+				case ANALYTICS:
+					UUID uuid = UUID.randomUUID();
+					groupAccessAuthorizations.put(uuid, groupId);
+					String webappBaseUrl = configuration.getWebappConfiguration().getBaseUrl();
+					int webappPort = configuration.getWebappConfiguration().getPort();
+
+					// TODO: parametrizzare
+					String textToSend = webappBaseUrl + ":" + webappPort + "/webapp/groups/" + groupId + "/?authorization=" + uuid;
+					log.debug("Generated url={}", textToSend);
+					bot.sendMessageToSingleChat(textToSend, senderId.toString());
+					bot.sendMessageToSingleChat(language.getLinkSentInPvtText(), groupId.toString());
+					break;
+				case UNKNOWN:
+				default:
+					log.debug("Unrecognized command={}", update.getMessage().getText());
+					bot.sendMessageToSingleChat(language.getUnknownCommandText(), groupId.toString());
+					break;
+			}
+		} else {
+			bot.sendMessageToSingleChat(language.getMustBeAdminText(), groupId.toString());
+		}
+	}
+
+	private void handlePrivateMessage(Update update) {
+		org.telegram.telegrambots.meta.api.objects.Message message = update.getMessage();
+
+		if (message.hasText()) {
+			handleTextUpdate(update);
+		} else {
+			handleNonTextUpdate(update);
+		}
+	}
+
+	private void handleNonTextUpdate(Update update) {
+		Chat chat = update.getMessage().getChat();
+		boolean ignoreNonCommandMessages = configuration.getBotConfiguration().getIgnoreNonCommandsMessages();
+
+		if (!ignoreNonCommandMessages) {
+			bot.sendMessageToSingleChat(language.getNonCommandText(), chat.getId().toString());
+		}
+	}
+
+	private void handleTextUpdate(Update update) {
+		org.telegram.telegrambots.meta.api.objects.User sender = update.getMessage().getFrom();
+		Chat chat = update.getMessage().getChat();
+		String receivedText = update.getMessage().getText();
+		log.info("Sender={} - received text={}", sender, receivedText);
+
+		boolean ignoreNonCommandMessages = configuration.getBotConfiguration().getIgnoreNonCommandsMessages();
+
+		if (receivedText.startsWith("/")) {
+			handlePrivateCommand(update);
+		} else if (Boolean.FALSE.equals(ignoreNonCommandMessages)) {
+			bot.sendMessageToSingleChat(language.getNonCommandText(), chat.getId().toString());
+		}
+	}
+
+	private void handlePrivateCommand(Update update) {
+		Command command = getCommandByString(update.getMessage().getText());
+		String senderId = update.getMessage().getFrom().getId().toString();
+		switch (command) {
+			case ANALYTICS:
+				bot.sendMessageToSingleChat(language.getPrivateCommandNotAllowedText(), senderId);
+				break;
+			case UNKNOWN:
+			default:
+				bot.sendMessageToSingleChat(language.getUnknownCommandText(), senderId);
+				break;
+		}
+	}
+
+	public Long getGroupIdByAuthorizedUserUUID(UUID uuid) {
+		return groupAccessAuthorizations.get(uuid);
 	}
 
 	private MessageType getMessageType(org.telegram.telegrambots.meta.api.objects.Message message) {
@@ -145,6 +259,7 @@ public class MessageController {
 		}
 	}
 
+	// TODO: aggiungere controllo e aggiunta a users_in_groups
 	private User addKnownUser(@NonNull User user) {
 		User persistedUser = knownUsers.get(user.getTelegramId());
 		if (persistedUser == null) {
