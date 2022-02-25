@@ -29,4 +29,9 @@ public class JoinEvent {
 	@ManyToOne
 	@JoinColumn(name = "adder_user_id", nullable=true)
 	private User adderUser;
+
+	@ManyToOne
+	@JoinColumn(name = "group_id", nullable=false)
+	@NonNull
+	private Group group;
 }

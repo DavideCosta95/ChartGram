@@ -29,4 +29,9 @@ public class LeaveEvent {
 	@ManyToOne
 	@JoinColumn(name = "remover_user_id", nullable=true)
 	private User removerUser;
+
+	@ManyToOne
+	@JoinColumn(name = "group_id", nullable=false)
+	@NonNull
+	private Group group;
 }
