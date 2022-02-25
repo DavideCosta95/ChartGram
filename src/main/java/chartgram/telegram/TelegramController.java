@@ -8,8 +8,6 @@ import chartgram.persistence.service.*;
 import chartgram.telegram.model.Command;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -19,7 +17,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@Component
 @Slf4j
 public class TelegramController {
 	private final ITelegramBot bot;
@@ -35,8 +32,7 @@ public class TelegramController {
 	private Map<String, Group> knownGroups;
 	private final Map<UUID, Long> groupAccessAuthorizations;
 
-	@Autowired
-	private TelegramController(Configuration configuration, ITelegramBot bot, Localization localization, UserService userService,
+	public TelegramController(Configuration configuration, ITelegramBot bot, Localization localization, UserService userService,
 							   MessageService messageService, GroupService groupService, JoinEventService joinEventService, LeaveEventService leaveEventService) {
 		this.knownUsers = new HashMap<>();
 		this.knownGroups = new HashMap<>();
@@ -218,6 +214,7 @@ public class TelegramController {
 
 	private void handleJoinUpdate(Update update) {
 		org.telegram.telegrambots.meta.api.objects.User sender = update.getMessage().getFrom();
+		// TODO: aggiungere in join e leave il gruppo a cui sono relativi
 		LocalDateTime now = LocalDateTime.now();
 
 		List<JoinEvent> joinEvents = new ArrayList<>(update.getMessage().getNewChatMembers().size());
@@ -232,6 +229,7 @@ public class TelegramController {
 					currentJoinEvent.setJoinedAt(now);
 					currentJoinEvent.setJoiningUser(u);
 					if (!u.getId().equals(sender.getId())) {
+						// TODO: usare entity da DB
 						User adder = new User(sender.getId().toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName(), now);
 						currentJoinEvent.setAdderUser(adder);
 					}

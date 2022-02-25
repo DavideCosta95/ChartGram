@@ -1,8 +1,11 @@
 package chartgram.config.spring;
 
+import chartgram.config.Localization;
 import chartgram.exceptions.BotStartupException;
+import chartgram.persistence.service.*;
 import chartgram.telegram.ITelegramBot;
 import chartgram.telegram.TelegramBot;
+import chartgram.telegram.TelegramController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,9 +15,9 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Configuration
 @Slf4j
-public class TelegramBotConfiguration {
+public class TelegramConfiguration {
 	@Bean
-	public ITelegramBot bot(chartgram.config.Configuration configuration) throws BotStartupException {
+	public ITelegramBot telegramBot(chartgram.config.Configuration configuration) throws BotStartupException {
 		boolean botEnabled = configuration.getBotConfiguration().getEnabled();
 		if (botEnabled) {
 			try {
@@ -30,5 +33,15 @@ public class TelegramBotConfiguration {
 			log.info("Telegram bot disabled: using bot mock");
 			return TelegramBot.Null;
 		}
+	}
+
+	@Bean
+	public TelegramController telegramController(chartgram.config.Configuration configuration, ITelegramBot bot, Localization localization, UserService userService, MessageService messageService, GroupService groupService, JoinEventService joinEventService, LeaveEventService leaveEventService) {
+		boolean botEnabled = configuration.getBotConfiguration().getEnabled();
+		TelegramController telegramController = new TelegramController(configuration, bot, localization, userService, messageService, groupService, joinEventService, leaveEventService);
+		if (botEnabled) {
+			telegramController.startup();
+		}
+		return telegramController;
 	}
 }
