@@ -2,62 +2,106 @@ package chartgram.api;
 
 import chartgram.persistence.entity.*;
 import chartgram.persistence.service.*;
+import chartgram.telegram.TelegramController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @Slf4j
+@RequestMapping("/api/groups")
 public class RestApiController {
-	private final UserService userService;
+	private final UserInGroupService userInGroupService;
 	private final MessageService messageService;
 	private final JoinEventService joinEventService;
 	private final LeaveEventService leaveEventService;
-	private final GroupService groupService;
+	private final TelegramController telegramController;
 
 	@Autowired
-	private RestApiController(UserService userService, MessageService messageService, JoinEventService joinEventService, LeaveEventService leaveEventService, GroupService groupService) {
-		this.userService = userService;
+	private RestApiController(UserInGroupService userInGroupService, MessageService messageService, JoinEventService joinEventService, LeaveEventService leaveEventService, TelegramController telegramController) {
+		this.userInGroupService = userInGroupService;
 		this.messageService = messageService;
 		this.joinEventService = joinEventService;
 		this.leaveEventService = leaveEventService;
-		this.groupService = groupService;
+		this.telegramController = telegramController;
 	}
 
-	@GetMapping("/api/{id}")
-	public User get(@PathVariable long id) {
-		return userService.getAll().stream()
-				.filter(e -> e.getId() == id)
-				.findAny()
-				.orElse(new User());
+	@ModelAttribute
+	public void addAttributes(@RequestHeader(value = "authorization", required = false) String authorizationHeader, Model model, HttpServletRequest request, HttpServletResponse response) {
+		model.addAttribute("authorized_group", "0");
+		String authorizationTokenInSession = (String) request.getSession().getAttribute("authorization_token");
+		log.debug("Authorization header={}, authorization token in session={}", authorizationHeader, authorizationTokenInSession);
+		String uuidString = authorizationHeader != null ? authorizationHeader : authorizationTokenInSession;
+		if (uuidString == null) {
+			response.setStatus(401);
+			log.info("Missing authentication");
+			return;
+		}
+		UUID authorizationUUID = null;
+		try {
+			authorizationUUID = UUID.fromString(uuidString);
+		} catch (IllegalArgumentException e) {
+			response.setStatus(400);
+			log.info("Malformed authorization UUID={}", uuidString);
+			return;
+		}
+		Long groupTelegramId = telegramController.getGroupIdByAuthorizedUserUUID(authorizationUUID);
+		if (groupTelegramId == null) {
+			response.setStatus(403);
+			log.info("Unrecognized user. Authorization={}", authorizationUUID);
+			return;
+		}
+		model.addAttribute("authorized_group", groupTelegramId);
 	}
 
-	@GetMapping("/api/messages")
-	public List<Message> getAllMessages() {
-		return messageService.getAll();
+	@GetMapping("/{groupId}/messages")
+	public List<Message> getAllMessages(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
+		if (groupId.equals(authorizedGroup)) {
+			return messageService.getAllByGroupTelegramId(groupId);
+		} else {
+			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
+			response.setStatus(403);
+			return Collections.emptyList();
+		}
 	}
 
-	@GetMapping("/api/join-events")
-	public List<JoinEvent> getAllJoinEvents() {
-		return joinEventService.getAll();
+	@GetMapping("/{groupId}/join-events")
+	public List<JoinEvent> getAllJoinEvents(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
+		if (groupId.equals(authorizedGroup)) {
+			return joinEventService.getAllByGroupTelegramId(groupId);
+		} else {
+			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
+			response.setStatus(403);
+			return Collections.emptyList();
+		}
 	}
 
-	@GetMapping("/api/leave-events")
-	public List<LeaveEvent> getAllLeaveEvents() {
-		return leaveEventService.getAll();
+	@GetMapping("/{groupId}/leave-events")
+	public List<LeaveEvent> getAllLeaveEvents(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
+		if (groupId.equals(authorizedGroup)) {
+			return leaveEventService.getAllByGroup(groupId);
+		} else {
+			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
+			response.setStatus(403);
+			return Collections.emptyList();
+		}
 	}
 
-	@GetMapping("/api/groups")
-	public List<Group> getAllGroups() {
-		return groupService.getAll();
-	}
-
-	@GetMapping("/api/users")
-	public List<User> getAllUsers() {
-		return userService.getAll();
+	@GetMapping("/{groupId}/users")
+	public List<User> getAllUsers(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
+		if (groupId.equals(authorizedGroup)) {
+			return userInGroupService.getUsersByGroupId(groupId);
+		} else {
+			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
+			response.setStatus(403);
+			return Collections.emptyList();
+		}
 	}
 }
