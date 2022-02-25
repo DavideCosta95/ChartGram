@@ -10,6 +10,7 @@ import chartgram.telegram.model.ITelegramBot;
 import chartgram.telegram.model.MessageType;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -20,6 +21,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Transactional
 public class TelegramController {
 	private final ITelegramBot bot;
 	private final Language language;
@@ -52,6 +54,7 @@ public class TelegramController {
 
 	private void handleGroupMessage(Update update) {
 		org.telegram.telegrambots.meta.api.objects.User sender = update.getMessage().getFrom();
+		String groupId = update.getMessage().getChatId().toString();
 
 		if (Boolean.TRUE.equals(sender.getIsBot())) {
 			return;
@@ -61,11 +64,11 @@ public class TelegramController {
 		org.telegram.telegrambots.meta.api.objects.Message incomingMessage = update.getMessage();
 		String text = incomingMessage.getText();
 
-		User user = new User(sender.getId().toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName(), now);
-		user = addKnownUser(user);
-
-		Group group = new Group(update.getMessage().getChatId().toString(), update.getMessage().getChat().getDescription(), now);
+		Group group = new Group(groupId, update.getMessage().getChat().getDescription(), now);
 		group = addKnownGroup(group);
+
+		User user = new User(sender.getId().toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName(), now);
+		user = addKnownUser(user, group);
 
 		int messageTypeId = getMessageType(incomingMessage).getId();
 		Message message = new Message(now, user, group, text, messageTypeId);
@@ -208,6 +211,7 @@ public class TelegramController {
 	private void handleJoinUpdate(Update update) {
 		org.telegram.telegrambots.meta.api.objects.User sender = update.getMessage().getFrom();
 		// TODO: aggiungere in join e leave il gruppo a cui sono relativi
+		// TODO: aggiungere ai gruppi noti e agli utenti noti anche quelli visti da join/leave
 		LocalDateTime now = LocalDateTime.now();
 
 		List<JoinEvent> joinEvents = new ArrayList<>(update.getMessage().getNewChatMembers().size());
@@ -221,8 +225,8 @@ public class TelegramController {
 					JoinEvent currentJoinEvent = new JoinEvent();
 					currentJoinEvent.setJoinedAt(now);
 					currentJoinEvent.setJoiningUser(u);
-					if (!u.getId().equals(sender.getId())) {
-						// TODO: usare entity da DB
+					if (!u.getTelegramId().equals(sender.getId().toString())) {
+						// TODO: usare entity da DB (ci sono nella mappa locale)
 						User adder = new User(sender.getId().toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName(), now);
 						currentJoinEvent.setAdderUser(adder);
 					}
@@ -250,14 +254,18 @@ public class TelegramController {
 		}
 	}
 
-	// TODO: aggiungere controllo e aggiunta a users_in_groups
-	private User addKnownUser(@NonNull User user) {
+	private User addKnownUser(@NonNull User user, @NonNull Group group) {
 		User persistedUser = knownUsers.get(user.getTelegramId());
 		if (persistedUser == null) {
 			log.info("Found new user={}", user);
 			persistedUser = servicesWrapper.getUserService().add(user);
 			knownUsers.put(persistedUser.getTelegramId(), persistedUser);
+			servicesWrapper.getUserInGroupService().add(new UserInGroup(persistedUser, group));
 		} else {
+			// TODO: usare cache
+			if (!servicesWrapper.getUserInGroupService().getGroupsByUserTelegramId(persistedUser.getTelegramId()).contains(group)) {
+				servicesWrapper.getUserInGroupService().add(new UserInGroup(persistedUser, group));
+			}
 			boolean modified = false;
 			if (!Objects.equals(persistedUser.getTelegramFirstName(), user.getTelegramFirstName())) {
 				persistedUser.setTelegramFirstName(user.getTelegramFirstName());
@@ -282,7 +290,7 @@ public class TelegramController {
 		Group persistedGroup = knownGroups.get(group.getTelegramId());
 		if (persistedGroup == null) {
 			persistedGroup = servicesWrapper.getGroupService().add(group);
-			knownGroups.put(group.getTelegramId(), group);
+			knownGroups.put(persistedGroup.getTelegramId(), persistedGroup);
 		} else {
 			if (!Objects.equals(persistedGroup.getDescription(), group.getDescription())) {
 				persistedGroup.setDescription(group.getDescription());
