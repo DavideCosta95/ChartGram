@@ -25,13 +25,11 @@ public class LeaveEventService {
 		return result;
 	}
 
+	public List<LeaveEvent> getAllByGroup(String groupId) {
+		return leaveEventRepository.getAllByGroupTelegramId(groupId);
+	}
+
 	public LeaveEvent add(LeaveEvent leaveEvent) {
-		LeaveEvent alreadyPersistedLeaveEvent = leaveEventRepository.findByLeavingUser(leaveEvent.getLeavingUser());
-		if (alreadyPersistedLeaveEvent == null) {
-			log.info("Inserted leave event={} in DB", leaveEvent);
 			return leaveEventRepository.save(leaveEvent);
-		}
-		log.debug("Leave event already present in DB: leave event={}", leaveEvent);
-		return alreadyPersistedLeaveEvent;
 	}
 }

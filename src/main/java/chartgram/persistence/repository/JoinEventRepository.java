@@ -1,9 +1,10 @@
 package chartgram.persistence.repository;
 
 import chartgram.persistence.entity.JoinEvent;
-import chartgram.persistence.entity.User;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
+
 public interface JoinEventRepository extends CrudRepository<JoinEvent, Long> {
-	JoinEvent findByJoiningUser(User addedUser);
+	List<JoinEvent> getAllByGroupTelegramId(String id);
 }

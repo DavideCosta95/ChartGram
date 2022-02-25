@@ -25,6 +25,10 @@ public class MessageService {
 		return result;
 	}
 
+	public List<Message> getAllByGroupTelegramId(String groupId) {
+		return messageRepository.getAllByGroupTelegramId(groupId);
+	}
+
 	public long add(Message message) {
 		Message persistedMessage = messageRepository.save(message);
 		return persistedMessage.getId();
