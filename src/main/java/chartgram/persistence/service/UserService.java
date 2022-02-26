@@ -26,6 +26,10 @@ public class UserService {
 		return result;
 	}
 
+	public User getByTelegramId(String telegramId) {
+		return userRepository.getUserByTelegramId(telegramId);
+	}
+
 	public User add(User user) {
 		Long id = user.getId();
 		User persistedUser = userRepository.save(user);

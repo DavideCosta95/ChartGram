@@ -25,6 +25,10 @@ public class GroupService {
 		return result;
 	}
 
+	public Group getByTelegramId(String telegramId) {
+		return groupRepository.getGroupByTelegramId(telegramId);
+	}
+
 	public Group add(Group group) {
 		Long id = group.getId();
 		Group persistedGroup = groupRepository.save(group);
