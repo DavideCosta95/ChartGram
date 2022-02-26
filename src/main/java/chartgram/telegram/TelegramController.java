@@ -30,14 +30,16 @@ public class TelegramController {
 
 	private Map<String, User> knownUsers;
 	private Map<String, Group> knownGroups;
+	private final Map<String, List<String>> userTelegramId2GroupMemberships;
 	private final Map<UUID, Long> groupAccessAuthorizations;
 
 	public TelegramController(Configuration configuration, ITelegramBot bot, Localization localization, ServicesWrapper servicesWrapper) {
 		this.knownUsers = new HashMap<>();
 		this.knownGroups = new HashMap<>();
+		this.userTelegramId2GroupMemberships = new HashMap<>();
 		this.groupAccessAuthorizations = new HashMap<>();
-		this.bot = bot;
 		this.configuration = configuration;
+		this.bot = bot;
 		String languageName = configuration.getLanguage();
 		this.language = localization.getLanguage(languageName);
 		this.servicesWrapper = servicesWrapper;
@@ -50,6 +52,10 @@ public class TelegramController {
 		bot.addOnLeavingUserHandler(this::handleLeaveUpdate);
 		knownUsers = servicesWrapper.getUserService().getAll().stream().collect(Collectors.toMap(User::getTelegramId, Function.identity()));
 		knownGroups = servicesWrapper.getGroupService().getAll().stream().collect(Collectors.toMap(Group::getTelegramId, Function.identity()));
+		servicesWrapper.getUserInGroupService().getAll().forEach(e -> {
+			List<String> currentMemberships = userTelegramId2GroupMemberships.computeIfAbsent(e.getUser().getTelegramId(), k -> new ArrayList<>());
+			currentMemberships.add(e.getGroup().getTelegramId());
+		});
 	}
 
 	private void handleGroupMessage(Update update) {
@@ -173,19 +179,19 @@ public class TelegramController {
 	private MessageType getMessageType(org.telegram.telegrambots.meta.api.objects.Message message) {
 		boolean hasMedia =
 				message.hasVoice()
-				|| message.hasAnimation()
-				|| message.hasAudio()
-				|| message.hasContact()
-				|| message.hasDice()
-				|| message.hasDocument()
-				|| message.hasLocation()
-				|| message.hasPhoto()
-				|| message.hasSticker()
-				|| message.hasInvoice()
-				|| message.hasSuccessfulPayment()
-				|| message.hasPassportData()
-				|| message.hasVideo()
-				|| message.hasVideoNote();
+						|| message.hasAnimation()
+						|| message.hasAudio()
+						|| message.hasContact()
+						|| message.hasDice()
+						|| message.hasDocument()
+						|| message.hasLocation()
+						|| message.hasPhoto()
+						|| message.hasSticker()
+						|| message.hasInvoice()
+						|| message.hasSuccessfulPayment()
+						|| message.hasPassportData()
+						|| message.hasVideo()
+						|| message.hasVideoNote();
 
 		if (!hasMedia) {
 			return MessageType.TEXT;
@@ -266,48 +272,79 @@ public class TelegramController {
 	}
 
 	private User addKnownUser(@NonNull User user, @NonNull Group group) {
-		User persistedUser = knownUsers.get(user.getTelegramId());
-		if (persistedUser == null) {
-			log.info("Found new user={}", user);
-			persistedUser = servicesWrapper.getUserService().add(user);
-			knownUsers.put(persistedUser.getTelegramId(), persistedUser);
-			servicesWrapper.getUserInGroupService().add(new UserInGroup(persistedUser, group));
-		} else {
-			// TODO: usare cache
-			if (!servicesWrapper.getUserInGroupService().getGroupsByUserTelegramId(persistedUser.getTelegramId()).contains(group)) {
+		User cachedUser = knownUsers.get(user.getTelegramId());
+		if (cachedUser == null) {
+			User persistedUser = servicesWrapper.getUserService().getByTelegramId(user.getTelegramId());
+			if (persistedUser == null) {
+				log.info("Found new user={}", user);
+				persistedUser = servicesWrapper.getUserService().add(user);
 				servicesWrapper.getUserInGroupService().add(new UserInGroup(persistedUser, group));
+			} else {
+				List<String> userGroupMemberships = userTelegramId2GroupMemberships.computeIfAbsent(persistedUser.getTelegramId(), k -> new ArrayList<>());
+				if (!userGroupMemberships.contains(group.getTelegramId())) {
+					boolean alreadyPersisted = servicesWrapper.getUserInGroupService().getGroupsByUserTelegramId(persistedUser.getTelegramId())
+							.stream()
+							.map(Group::getTelegramId)
+							.anyMatch(s -> s.equals(group.getTelegramId()));
+					if (!alreadyPersisted) {
+						servicesWrapper.getUserInGroupService().add(new UserInGroup(persistedUser, group));
+					}
+					userGroupMemberships.add(group.getTelegramId());
+				}
+			}
+			knownUsers.put(persistedUser.getTelegramId(), persistedUser);
+			List<String> groupSingletonList = new ArrayList<>();
+			groupSingletonList.add(group.getTelegramId());
+			userTelegramId2GroupMemberships.put(persistedUser.getTelegramId(), groupSingletonList);
+			cachedUser = persistedUser;
+		} else {
+			List<String> userGroupMemberships = userTelegramId2GroupMemberships.computeIfAbsent(cachedUser.getTelegramId(), k -> new ArrayList<>());
+			if (!userGroupMemberships.contains(group.getTelegramId())) {
+				boolean alreadyPersisted = servicesWrapper.getUserInGroupService().getGroupsByUserTelegramId(cachedUser.getTelegramId())
+						.stream()
+						.map(Group::getTelegramId)
+						.anyMatch(s -> s.equals(group.getTelegramId()));
+				if (!alreadyPersisted) {
+					servicesWrapper.getUserInGroupService().add(new UserInGroup(cachedUser, group));
+				}
+				userGroupMemberships.add(group.getTelegramId());
 			}
 			boolean modified = false;
-			if (!Objects.equals(persistedUser.getTelegramFirstName(), user.getTelegramFirstName())) {
-				persistedUser.setTelegramFirstName(user.getTelegramFirstName());
+			if (!Objects.equals(cachedUser.getTelegramFirstName(), user.getTelegramFirstName())) {
+				cachedUser.setTelegramFirstName(user.getTelegramFirstName());
 				modified = true;
 			}
-			if (!Objects.equals(persistedUser.getTelegramLastName(), user.getTelegramLastName())) {
-				persistedUser.setTelegramLastName(user.getTelegramLastName());
+			if (!Objects.equals(cachedUser.getTelegramLastName(), user.getTelegramLastName())) {
+				cachedUser.setTelegramLastName(user.getTelegramLastName());
 				modified = true;
 			}
-			if (!Objects.equals(persistedUser.getTelegramUsername(), user.getTelegramUsername())) {
-				persistedUser.setTelegramUsername(user.getTelegramUsername());
+			if (!Objects.equals(cachedUser.getTelegramUsername(), user.getTelegramUsername())) {
+				cachedUser.setTelegramUsername(user.getTelegramUsername());
 				modified = true;
 			}
 			if (modified) {
-				persistedUser = servicesWrapper.getUserService().add(persistedUser);
+				cachedUser = servicesWrapper.getUserService().add(cachedUser);
 			}
 		}
-		return persistedUser;
+		return cachedUser;
 	}
 
 	private Group addKnownGroup(@NonNull Group group) {
-		Group persistedGroup = knownGroups.get(group.getTelegramId());
-		if (persistedGroup == null) {
-			persistedGroup = servicesWrapper.getGroupService().add(group);
+		Group cachedGroup = knownGroups.get(group.getTelegramId());
+		if (cachedGroup == null) {
+			Group persistedGroup = servicesWrapper.getGroupService().getByTelegramId(group.getTelegramId());
+			if (persistedGroup == null) {
+				log.info("Found new group={}", group);
+				persistedGroup = servicesWrapper.getGroupService().add(group);
+			}
 			knownGroups.put(persistedGroup.getTelegramId(), persistedGroup);
+			cachedGroup = persistedGroup;
 		} else {
-			if (!Objects.equals(persistedGroup.getDescription(), group.getDescription())) {
-				persistedGroup.setDescription(group.getDescription());
-				persistedGroup = servicesWrapper.getGroupService().add(persistedGroup);
+			if (!Objects.equals(cachedGroup.getDescription(), group.getDescription())) {
+				cachedGroup.setDescription(group.getDescription());
+				cachedGroup = servicesWrapper.getGroupService().add(cachedGroup);
 			}
 		}
-		return persistedGroup;
+		return cachedGroup;
 	}
 }

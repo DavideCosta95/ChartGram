@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,12 @@ public class UserInGroupService {
 		return userInGroupRepository.getAllByUserTelegramId(userId).stream()
 				.map(UserInGroup::getGroup)
 				.collect(Collectors.toList());
+	}
+
+	public List<UserInGroup> getAll() {
+		List<UserInGroup> result = new ArrayList<>();
+		userInGroupRepository.findAll().forEach(result::add);
+		return result;
 	}
 
 	public UserInGroup add(UserInGroup userInGroup) {
