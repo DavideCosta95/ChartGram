@@ -1,0 +1,17 @@
+{
+  "logging": {
+    "config": "config/logback.xml"
+  },
+  "spring": {
+    "datasource": {
+      "url": "jdbc:postgresql://url.to.db:5432/db_name?user=XXXXXX&password=XXXXX"
+    },
+    "jpa": {
+      "properties": {
+        "hibernate": {
+          "default_schema": "public"
+        }
+      }
+    }
+  }
+}

@@ -5,4 +5,5 @@
 build
 /.idea/
 /config/configuration.json
+/config/application.json
 /logs/
