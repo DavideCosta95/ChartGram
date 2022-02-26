@@ -33,7 +33,6 @@ public class Configuration {
 		@NonNull
 		private String baseUrl;
 
-		@JsonProperty("port")
 		@NonNull
 		private Integer port;
 	}
