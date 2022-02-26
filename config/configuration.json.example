@@ -1,4 +1,5 @@
 {
+  "test": true,
   "language": "italian",
   "timezone": "Europe/Rome",
   "bot": {

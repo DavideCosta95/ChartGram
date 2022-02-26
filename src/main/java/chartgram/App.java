@@ -24,6 +24,9 @@ public class App implements ApplicationRunner {
     public void run(ApplicationArguments arg0) throws Exception {
         Configuration configuration = context.getBean(Configuration.class);
         TimeZone.setDefault(TimeZone.getTimeZone(configuration.getTimezone()));
+        if (configuration.isTest()) {
+            log.warn("Test mode enabled! API won't ask for authorization");
+        }
     }
 
     @Autowired

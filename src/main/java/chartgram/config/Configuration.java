@@ -10,6 +10,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class Configuration {
+	@JsonProperty("test")
+	private boolean test;
+
 	@JsonProperty("language")
 	@NonNull
 	private String language;

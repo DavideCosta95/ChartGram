@@ -1,5 +1,6 @@
 package chartgram.api;
 
+import chartgram.config.Configuration;
 import chartgram.persistence.entity.*;
 import chartgram.persistence.service.*;
 import chartgram.telegram.TelegramController;
@@ -24,13 +25,16 @@ public class RestApiController {
 	private final LeaveEventService leaveEventService;
 	private final TelegramController telegramController;
 
+	private final boolean test;
+
 	@Autowired
-	private RestApiController(UserInGroupService userInGroupService, MessageService messageService, JoinEventService joinEventService, LeaveEventService leaveEventService, TelegramController telegramController) {
+	private RestApiController(Configuration configuration, UserInGroupService userInGroupService, MessageService messageService, JoinEventService joinEventService, LeaveEventService leaveEventService, TelegramController telegramController) {
 		this.userInGroupService = userInGroupService;
 		this.messageService = messageService;
 		this.joinEventService = joinEventService;
 		this.leaveEventService = leaveEventService;
 		this.telegramController = telegramController;
+		this.test = configuration.isTest();
 	}
 
 	@ModelAttribute
@@ -63,7 +67,7 @@ public class RestApiController {
 
 	@GetMapping("/{groupId}/messages")
 	public List<Message> getAllMessages(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
-		if (groupId.equals(authorizedGroup)) {
+		if (groupId.equals(authorizedGroup) || test) {
 			return messageService.getAllByGroupTelegramId(groupId);
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
@@ -74,7 +78,7 @@ public class RestApiController {
 
 	@GetMapping("/{groupId}/join-events")
 	public List<JoinEvent> getAllJoinEvents(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
-		if (groupId.equals(authorizedGroup)) {
+		if (groupId.equals(authorizedGroup) || test) {
 			return joinEventService.getAllByGroupTelegramId(groupId);
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
@@ -85,7 +89,7 @@ public class RestApiController {
 
 	@GetMapping("/{groupId}/leave-events")
 	public List<LeaveEvent> getAllLeaveEvents(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
-		if (groupId.equals(authorizedGroup)) {
+		if (groupId.equals(authorizedGroup) || test) {
 			return leaveEventService.getAllByGroupTelegramId(groupId);
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
@@ -96,7 +100,7 @@ public class RestApiController {
 
 	@GetMapping("/{groupId}/users")
 	public List<User> getAllUsers(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
-		if (groupId.equals(authorizedGroup)) {
+		if (groupId.equals(authorizedGroup) || test) {
 			return userInGroupService.getUsersByGroupTelegramId(groupId);
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
