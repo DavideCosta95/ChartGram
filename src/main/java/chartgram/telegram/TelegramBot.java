@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatAdministrators;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.*;
@@ -19,15 +20,14 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot {
-
-	public static final ITelegramBot Null = new NullTelegramBot();
+	public static final ITelegramBot Null = NullTelegramBot.getInstance();
 
 	private String botName;
 	private String botUsername;
@@ -115,6 +115,14 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 					.collect(Collectors.toList());
 		}
 		return Collections.emptyList();
+	}
+
+	public void sendImage(InputStream image, String caption, String recipientId) {
+		SendPhoto photo = new SendPhoto();
+		photo.setChatId(recipientId);
+		photo.setPhoto(new InputFile(image, "chart"));
+		photo.setCaption(caption);
+		sendPhoto(photo);
 	}
 
 	private void handleJoinUpdate(Update update) {
@@ -224,6 +232,20 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 		pinChatMessage.setChatId(groupId);
 		pinChatMessage.setMessageId(messageId);
 		return executeChatAction(pinChatMessage) != null;
+	}
+
+	private Message sendPhoto(SendPhoto photo) {
+		try {
+			Message result = execute(photo);
+			Thread.sleep(80L);
+			return result;
+		} catch (TelegramApiException e) {
+			log.error("", e);
+		} catch (InterruptedException e) {
+			log.error("", e);
+			Thread.currentThread().interrupt();
+		}
+		return null;
 	}
 
 	private <T extends Serializable, A extends BotApiMethod<T>> T executeChatAction(A action) {

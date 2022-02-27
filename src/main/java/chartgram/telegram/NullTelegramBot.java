@@ -6,11 +6,23 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class NullTelegramBot implements ITelegramBot {
+	private static ITelegramBot instance;
+
+	private NullTelegramBot() {}
+
+	public static ITelegramBot getInstance() {
+		if (instance == null) {
+			instance = new NullTelegramBot();
+		}
+		return instance;
+	}
+
 	@Override
 	public void addOnGroupMessageReceivedHandler(Consumer<Update> handler) {
 		// no-op
@@ -119,5 +131,10 @@ public class NullTelegramBot implements ITelegramBot {
 	@Override
 	public List<Long> getAGroupAdmins(Long groupId) {
 		return Collections.emptyList();
+	}
+
+	@Override
+	public void sendImage(InputStream image, String caption, String recipientId) {
+		// no-op
 	}
 }

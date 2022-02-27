@@ -5,6 +5,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -52,4 +53,6 @@ public interface ITelegramBot {
 	void sendMessageWithUrlByInlineKeyboard(String textToSend, String recipientId, String buttonText, String buttonUrl);
 
 	List<Long> getAGroupAdmins(Long groupId);
+
+	void sendImage(InputStream image, String caption, String recipientId);
 }
