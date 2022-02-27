@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.HttpHeaders;
 
 @RestController
 @Slf4j
@@ -68,6 +69,8 @@ public class RestApiController {
 	@GetMapping("/{groupId}/messages")
 	public List<Message> getAllMessages(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
 		if (groupId.equals(authorizedGroup) || test) {
+			response.setStatus(200);
+			response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 			return messageService.getAllByGroupTelegramId(groupId);
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
@@ -79,6 +82,8 @@ public class RestApiController {
 	@GetMapping("/{groupId}/join-events")
 	public List<JoinEvent> getAllJoinEvents(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
 		if (groupId.equals(authorizedGroup) || test) {
+			response.setStatus(200);
+			response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 			return joinEventService.getAllByGroupTelegramId(groupId);
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
@@ -90,6 +95,8 @@ public class RestApiController {
 	@GetMapping("/{groupId}/leave-events")
 	public List<LeaveEvent> getAllLeaveEvents(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
 		if (groupId.equals(authorizedGroup) || test) {
+			response.setStatus(200);
+			response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 			return leaveEventService.getAllByGroupTelegramId(groupId);
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
@@ -101,6 +108,8 @@ public class RestApiController {
 	@GetMapping("/{groupId}/users")
 	public List<User> getAllUsers(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
 		if (groupId.equals(authorizedGroup) || test) {
+			response.setStatus(200);
+			response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 			return userInGroupService.getUsersByGroupTelegramId(groupId);
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
