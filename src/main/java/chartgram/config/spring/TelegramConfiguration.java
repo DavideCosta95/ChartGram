@@ -1,5 +1,6 @@
 package chartgram.config.spring;
 
+import chartgram.charts.ChartRenderer;
 import chartgram.config.Localization;
 import chartgram.exceptions.BotStartupException;
 import chartgram.persistence.service.*;
@@ -30,15 +31,15 @@ public class TelegramConfiguration {
 				throw new BotStartupException(e);
 			}
 		} else {
-			log.info("Telegram bot disabled: using bot mock");
+			log.warn("Telegram bot disabled: using bot mock");
 			return TelegramBot.Null;
 		}
 	}
 
 	@Bean
-	public TelegramController telegramController(chartgram.config.Configuration configuration, ITelegramBot bot, Localization localization, ServicesWrapper servicesWrapper) {
+	public TelegramController telegramController(chartgram.config.Configuration configuration, ChartRenderer chartRenderer, ITelegramBot bot, Localization localization, ServicesWrapper servicesWrapper) {
 		boolean botEnabled = configuration.getBotConfiguration().getEnabled();
-		TelegramController telegramController = new TelegramController(configuration, bot, localization, servicesWrapper);
+		TelegramController telegramController = new TelegramController(configuration, chartRenderer, bot, localization, servicesWrapper);
 		if (botEnabled) {
 			telegramController.startup();
 		}

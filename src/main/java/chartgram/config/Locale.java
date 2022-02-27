@@ -7,7 +7,7 @@ import lombok.NonNull;
 
 @Data
 @NoArgsConstructor
-public class Language {
+public class Locale {
 	@JsonProperty("non_command_text")
 	@NonNull
 	private String nonCommandText;

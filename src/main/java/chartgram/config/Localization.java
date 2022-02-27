@@ -11,12 +11,12 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class Localization {
-	@JsonProperty("languages")
+	@JsonProperty("locales")
 	@NonNull
-	private List<Map<String, Language>> languages;
+	private List<Map<String, Locale>> locales;
 
-	public Language getLanguage(String name) {
-		return languages.stream()
+	public Locale getLocaleByLanguage(String name) {
+		return locales.stream()
 				.filter(e -> e.containsKey(name))
 				.map(e -> e.get(name))
 				.findFirst()

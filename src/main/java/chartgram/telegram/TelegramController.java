@@ -1,7 +1,8 @@
 package chartgram.telegram;
 
+import chartgram.charts.ChartRenderer;
 import chartgram.config.Configuration;
-import chartgram.config.Language;
+import chartgram.config.Locale;
 import chartgram.config.Localization;
 import chartgram.persistence.entity.*;
 import chartgram.persistence.service.*;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -24,24 +26,26 @@ import java.util.stream.Collectors;
 @Transactional
 public class TelegramController {
 	private final ITelegramBot bot;
-	private final Language language;
+	private final Locale locale;
 	private final ServicesWrapper servicesWrapper;
 	private final Configuration configuration;
+	private final ChartRenderer chartRenderer;
 
 	private Map<String, User> knownUsers;
 	private Map<String, Group> knownGroups;
 	private final Map<String, List<String>> userTelegramId2GroupMemberships;
 	private final Map<UUID, Long> groupAccessAuthorizations;
 
-	public TelegramController(Configuration configuration, ITelegramBot bot, Localization localization, ServicesWrapper servicesWrapper) {
+	public TelegramController(Configuration configuration, ChartRenderer chartRenderer, ITelegramBot bot, Localization localization, ServicesWrapper servicesWrapper) {
 		this.knownUsers = new HashMap<>();
 		this.knownGroups = new HashMap<>();
 		this.userTelegramId2GroupMemberships = new HashMap<>();
 		this.groupAccessAuthorizations = new HashMap<>();
 		this.configuration = configuration;
+		this.chartRenderer = chartRenderer;
 		this.bot = bot;
 		String languageName = configuration.getLanguage();
-		this.language = localization.getLanguage(languageName);
+		this.locale = localization.getLocaleByLanguage(languageName);
 		this.servicesWrapper = servicesWrapper;
 	}
 
@@ -91,6 +95,9 @@ public class TelegramController {
 		if (text.contains("/analytics")) {
 			return Command.ANALYTICS;
 		}
+		if (text.contains("/charts")) {
+			return Command.CHARTS;
+		}
 		return Command.UNKNOWN;
 	}
 
@@ -111,16 +118,20 @@ public class TelegramController {
 					String textToSend = webappBaseUrl + ":" + webappPort + "/webapp/groups/" + groupId + "/?authorization=" + uuid;
 					log.debug("Generated url={}", textToSend);
 					bot.sendMessageToSingleChat(textToSend, senderId.toString());
-					bot.sendMessageToSingleChat(language.getLinkSentInPvtText(), groupId.toString());
+					bot.sendMessageToSingleChat(locale.getLinkSentInPvtText(), groupId.toString());
+					break;
+				case CHARTS:
+					InputStream image = chartRenderer.createPng();
+					bot.sendImage(image, "caption", senderId.toString());
 					break;
 				case UNKNOWN:
 				default:
 					log.debug("Unrecognized command={}", update.getMessage().getText());
-					bot.sendMessageToSingleChat(language.getUnknownCommandText(), groupId.toString());
+					bot.sendMessageToSingleChat(locale.getUnknownCommandText(), groupId.toString());
 					break;
 			}
 		} else {
-			bot.sendMessageToSingleChat(language.getMustBeAdminText(), groupId.toString());
+			bot.sendMessageToSingleChat(locale.getMustBeAdminText(), groupId.toString());
 		}
 	}
 
@@ -139,7 +150,7 @@ public class TelegramController {
 		boolean ignoreNonCommandMessages = configuration.getBotConfiguration().getIgnoreNonCommandsMessages();
 
 		if (!ignoreNonCommandMessages) {
-			bot.sendMessageToSingleChat(language.getNonCommandText(), chat.getId().toString());
+			bot.sendMessageToSingleChat(locale.getNonCommandText(), chat.getId().toString());
 		}
 	}
 
@@ -154,7 +165,7 @@ public class TelegramController {
 		if (receivedText.startsWith("/")) {
 			handlePrivateCommand(update);
 		} else if (Boolean.FALSE.equals(ignoreNonCommandMessages)) {
-			bot.sendMessageToSingleChat(language.getNonCommandText(), chat.getId().toString());
+			bot.sendMessageToSingleChat(locale.getNonCommandText(), chat.getId().toString());
 		}
 	}
 
@@ -163,11 +174,12 @@ public class TelegramController {
 		String senderId = update.getMessage().getFrom().getId().toString();
 		switch (command) {
 			case ANALYTICS:
-				bot.sendMessageToSingleChat(language.getPrivateCommandNotAllowedText(), senderId);
+			case CHARTS:
+				bot.sendMessageToSingleChat(locale.getPrivateCommandNotAllowedText(), senderId);
 				break;
 			case UNKNOWN:
 			default:
-				bot.sendMessageToSingleChat(language.getUnknownCommandText(), senderId);
+				bot.sendMessageToSingleChat(locale.getUnknownCommandText(), senderId);
 				break;
 		}
 	}
