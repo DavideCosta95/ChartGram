@@ -2,6 +2,7 @@ package chartgram.telegram;
 
 import chartgram.charts.ChartController;
 import chartgram.charts.model.Chart;
+import chartgram.charts.model.ChartType;
 import chartgram.config.Configuration;
 import chartgram.config.Locale;
 import chartgram.config.Localization;
@@ -123,7 +124,9 @@ public class TelegramController {
 				case CHARTS:
 					// TODO: sistemare testo
 					bot.sendMessageToSingleChat(locale.getLinkSentInPvtText(), groupId.toString());
-					Chart chart = chartController.getChart("pie", groupId.toString());
+					Chart chart = chartController.getChart(ChartType.MESSAGES_DISTRIBUTION_BY_TYPE, groupId.toString());
+					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
+					chart = chartController.getChart(ChartType.MESSAGES_WITH_RESPECT_TIME, groupId.toString());
 					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
 					break;
 				case UNKNOWN:
