@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Entity(name = "join_events")
-public class JoinEvent {
+public class JoinEvent implements TemporalEvent {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@NonNull
 	@Id
@@ -34,4 +34,9 @@ public class JoinEvent {
 	@JoinColumn(name = "group_id", nullable=false)
 	@NonNull
 	private Group group;
+
+	@Override
+	public LocalDateTime getAt() {
+		return getJoinedAt();
+	}
 }

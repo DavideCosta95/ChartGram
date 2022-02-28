@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Entity(name = "leave_events")
-public class LeaveEvent {
+public class LeaveEvent implements TemporalEvent {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@NonNull
 	@Id
@@ -34,4 +34,9 @@ public class LeaveEvent {
 	@JoinColumn(name = "group_id", nullable=false)
 	@NonNull
 	private Group group;
+
+	@Override
+	public LocalDateTime getAt() {
+		return getLeavingAt();
+	}
 }

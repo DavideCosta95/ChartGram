@@ -128,6 +128,12 @@ public class TelegramController {
 					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
 					chart = chartController.getChart(ChartType.MESSAGES_WITH_RESPECT_TIME, groupId.toString());
 					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
+					chart = chartController.getChart(ChartType.JOIN_DISTRIBUTION_RESPECT_TIME, groupId.toString());
+					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
+					chart = chartController.getChart(ChartType.LEAVINGS_DISTRIBUTION_RESPECT_TIME, groupId.toString());
+					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
+					chart = chartController.getChart(ChartType.JOINS_VS_LIVINGS, groupId.toString());
+					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
 					break;
 				case UNKNOWN:
 				default:
@@ -278,6 +284,7 @@ public class TelegramController {
 			leaveEvent.setLeavingAt(now);
 			leaveEvent.setGroup(group);
 			leaveEvent.setLeavingUser(persistedLeavingUser);
+			// TODO: rimuovere da users_in_group
 
 			if (!sender.getId().equals(user.getId())) {
 				User removerUser = new User(sender.getId().toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName(), now);
@@ -297,6 +304,7 @@ public class TelegramController {
 				persistedUser = servicesWrapper.getUserService().add(user);
 				servicesWrapper.getUserInGroupService().add(new UserInGroup(persistedUser, group));
 			} else {
+				// TODO: vedere di estrarre metodo
 				List<String> userGroupMemberships = userTelegramId2GroupMemberships.computeIfAbsent(persistedUser.getTelegramId(), k -> new ArrayList<>());
 				if (!userGroupMemberships.contains(group.getTelegramId())) {
 					boolean alreadyPersisted = servicesWrapper.getUserInGroupService().getGroupsByUserTelegramId(persistedUser.getTelegramId())

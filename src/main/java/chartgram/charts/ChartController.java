@@ -2,9 +2,12 @@ package chartgram.charts;
 
 import chartgram.charts.model.Chart;
 import chartgram.charts.model.ChartType;
+import chartgram.persistence.entity.JoinEvent;
+import chartgram.persistence.entity.LeaveEvent;
 import chartgram.persistence.entity.Message;
+import chartgram.persistence.entity.TemporalEvent;
 import chartgram.persistence.service.ServicesWrapper;
-import chartgram.persistence.utils.MessageSentTimeBasedComparator;
+import chartgram.persistence.utils.TemporalEventComparator;
 import chartgram.telegram.model.MessageType;
 import lombok.extern.slf4j.Slf4j;
 import org.jfree.chart.ChartFactory;
@@ -50,11 +53,24 @@ public class ChartController {
 				// TODO: input granularità
 				chart = makeMessagesWithRespectTimeChart(groupId, 24);
 				// TODO: caption
-				caption = "LINE";
+				caption = "LINE_MESSAGES";
+				break;
+			case JOIN_DISTRIBUTION_RESPECT_TIME:
+				chart = makeJoinsWithRespectTimeChart(groupId, 24);
+				caption = "LINE_JOINS";
+				break;
+			case LEAVINGS_DISTRIBUTION_RESPECT_TIME:
+				chart = makeLeavingsWithRespectTimeChart(groupId, 24);
+				caption = "LINE_LEAVINGS";
+				break;
+			case JOINS_VS_LIVINGS:
+				chart = makeJoinsVsLeavingsWithRespectTimeChart(groupId, 24);
+				caption = "JOINS_VS_LEAVINGS";
 				break;
 			default:
 				break;
 		}
+		// TODO: vedere caratteristiche estetiche del grafico
 		InputStream image = chartRenderer.createPng(chart);
 		return new Chart(image, caption);
 	}
@@ -78,8 +94,27 @@ public class ChartController {
 
 	private JFreeChart makeMessagesWithRespectTimeChart(String groupId, int granularityInHours) {
 		List<Message> messages = servicesWrapper.getMessageService().getAllByGroupTelegramId(groupId);
-		DefaultCategoryDataset dataset = createLineDataset(messages, granularityInHours);
-		return ChartFactory.createLineChart("Messages sent with respect time", "Time", "Number of messages", dataset, PlotOrientation.VERTICAL,true,true,false);
+		DefaultCategoryDataset dataset = createLineDataset(messages, granularityInHours, "messages");
+		return ChartFactory.createLineChart("Messages sent with respect time", "Time", "Number of messages", dataset, PlotOrientation.VERTICAL, true, true, false);
+	}
+
+	private JFreeChart makeJoinsWithRespectTimeChart(String groupId, int granularityInHours) {
+		List<JoinEvent> joins = servicesWrapper.getJoinEventService().getAllByGroupTelegramId(groupId);
+		DefaultCategoryDataset dataset = createLineDataset(joins, granularityInHours, "joins");
+		return ChartFactory.createLineChart("Group joins with respect time", "Time", "Number of joins", dataset, PlotOrientation.VERTICAL, true, true, false);
+	}
+
+	private JFreeChart makeLeavingsWithRespectTimeChart(String groupId, int granularityInHours) {
+		List<LeaveEvent> leavings = servicesWrapper.getLeaveEventService().getAllByGroupTelegramId(groupId);
+		DefaultCategoryDataset dataset = createLineDataset(leavings, granularityInHours, "leavings");
+		return ChartFactory.createLineChart("Groups leavings with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false);
+	}
+
+	private JFreeChart makeJoinsVsLeavingsWithRespectTimeChart(String groupId, int granularityInHours) {
+		List<LeaveEvent> leavings = servicesWrapper.getLeaveEventService().getAllByGroupTelegramId(groupId);
+		List<JoinEvent> joins = servicesWrapper.getJoinEventService().getAllByGroupTelegramId(groupId);
+		DefaultCategoryDataset dataset = createMultilineDataset(leavings, joins, granularityInHours, "leavings", "joins");
+		return ChartFactory.createLineChart("Groups leavings with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false);
 	}
 
 	private DefaultPieDataset<String> createPieDataset(Map<String, Long> values) {
@@ -88,22 +123,15 @@ public class ChartController {
 		return dataset;
 	}
 
-	private DefaultCategoryDataset createLineDataset(List<Message> messages, int granularityInHours) {
-		messages.sort(new MessageSentTimeBasedComparator());
-		LocalDateTime earliestMessageTime = messages.get(0).getSentAt();
-		LocalDateTime threshold = earliestMessageTime.plus(Duration.ofHours(granularityInHours)).minus(Duration.ofMinutes(earliestMessageTime.getMinute()));
-		SortedMap<LocalDateTime, Long> time2messagesNumber = new TreeMap<>();
-
-		for (Message message : messages) {
-			LocalDateTime currentMessageTime = message.getSentAt();
-			if (!currentMessageTime.isBefore(threshold)) {
-				threshold = threshold.plus(Duration.ofHours(granularityInHours));
-			}
-			time2messagesNumber.putIfAbsent(threshold, 0L);
-			time2messagesNumber.computeIfPresent(threshold, (k, v) -> v + 1);
+	private DefaultCategoryDataset createLineDataset(List<? extends TemporalEvent> events, int granularityInHours, String eventNameInLegend) {
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+		if (events.isEmpty()) {
+			dataset.addValue(100, eventNameInLegend, "");
+			return dataset;
 		}
-		DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
-		for (Map.Entry<LocalDateTime, Long> entry : time2messagesNumber.entrySet()) {
+
+		SortedMap<LocalDateTime, Long> time2eventsNumber = getDatasetByTemporalEvents(events, granularityInHours);
+		for (Map.Entry<LocalDateTime, Long> entry : time2eventsNumber.entrySet()) {
 			// TODO
 			String currentValue = "";
 			if (granularityInHours == 24) {
@@ -112,8 +140,63 @@ public class ChartController {
 			if (granularityInHours == 1) {
 				currentValue = entry.getKey().getHour() + ":" + entry.getKey().getMinute();
 			}
-			dataset.addValue(entry.getValue(), "messages", currentValue);
+			dataset.addValue(entry.getValue(), eventNameInLegend, currentValue);
 		}
 		return dataset;
+	}
+
+	// TODO: generalizza per n series
+	private DefaultCategoryDataset createMultilineDataset(List<? extends TemporalEvent> eventsA, List<? extends TemporalEvent> eventsB, int granularityInHours, String eventNameInLegendA, String eventNameInLegendB) {
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+		if (eventsA.isEmpty()) {
+			dataset.addValue(100, eventNameInLegendA, "");
+		} else {
+			SortedMap<LocalDateTime, Long> time2eventsNumberA = getDatasetByTemporalEvents(eventsA, granularityInHours);
+			for (Map.Entry<LocalDateTime, Long> entry : time2eventsNumberA.entrySet()) {
+				// TODO
+				String currentValue = "";
+				if (granularityInHours == 24) {
+					currentValue = entry.getKey().getDayOfMonth() + "/" + entry.getKey().getMonthValue();
+				}
+				if (granularityInHours == 1) {
+					currentValue = entry.getKey().getHour() + ":" + entry.getKey().getMinute();
+				}
+				dataset.addValue(entry.getValue(), eventNameInLegendA, currentValue);
+			}
+		}
+		if (eventsB.isEmpty()) {
+			dataset.addValue(100, eventNameInLegendB, "");
+		} else {
+			SortedMap<LocalDateTime, Long> time2eventsNumberB = getDatasetByTemporalEvents(eventsB, granularityInHours);
+			for (Map.Entry<LocalDateTime, Long> entry : time2eventsNumberB.entrySet()) {
+				// TODO
+				String currentValue = "";
+				if (granularityInHours == 24) {
+					currentValue = entry.getKey().getDayOfMonth() + "/" + entry.getKey().getMonthValue();
+				}
+				if (granularityInHours == 1) {
+					currentValue = entry.getKey().getHour() + ":" + entry.getKey().getMinute();
+				}
+				dataset.addValue(entry.getValue(), eventNameInLegendB, currentValue);
+			}
+		}
+		return dataset;
+	}
+
+	private SortedMap<LocalDateTime, Long> getDatasetByTemporalEvents(List<? extends TemporalEvent> events, int granularityInHours) {
+		events.sort(new TemporalEventComparator());
+		LocalDateTime earliestEventTime = events.get(0).getAt();
+		LocalDateTime threshold = earliestEventTime.plus(Duration.ofHours(granularityInHours)).minus(Duration.ofMinutes(earliestEventTime.getMinute()));
+		SortedMap<LocalDateTime, Long> time2eventsNumber = new TreeMap<>();
+
+		for (TemporalEvent event : events) {
+			LocalDateTime currentEventTime = event.getAt();
+			if (!currentEventTime.isBefore(threshold)) {
+				threshold = threshold.plus(Duration.ofHours(granularityInHours));
+			}
+			time2eventsNumber.putIfAbsent(threshold, 0L);
+			time2eventsNumber.computeIfPresent(threshold, (k, v) -> v + 1);
+		}
+		return time2eventsNumber;
 	}
 }

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Entity(name = "messages")
-public class Message {
+public class Message implements TemporalEvent {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Id
 	@Column(name = "id")
@@ -40,5 +40,10 @@ public class Message {
 		this.group = group;
 		this.text = text;
 		this.type = type;
+	}
+
+	@Override
+	public LocalDateTime getAt() {
+		return getSentAt();
 	}
 }
