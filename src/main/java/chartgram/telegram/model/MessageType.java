@@ -1,5 +1,7 @@
 package chartgram.telegram.model;
 
+import java.util.Arrays;
+
 public enum MessageType {
 	TEXT(1),
 	AUDIO(2),
@@ -16,5 +18,9 @@ public enum MessageType {
 
 	public int getId() {
 		return id;
+	}
+
+	public static MessageType getTypeById(int id) {
+		return Arrays.stream(values()).filter(e -> id == e.getId()).findAny().orElse(OTHER);
 	}
 }

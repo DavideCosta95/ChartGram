@@ -1,6 +1,6 @@
 package chartgram.config.spring;
 
-import chartgram.charts.ChartRenderer;
+import chartgram.charts.ChartController;
 import chartgram.config.Localization;
 import chartgram.exceptions.BotStartupException;
 import chartgram.persistence.service.*;
@@ -37,9 +37,9 @@ public class TelegramConfiguration {
 	}
 
 	@Bean
-	public TelegramController telegramController(chartgram.config.Configuration configuration, ChartRenderer chartRenderer, ITelegramBot bot, Localization localization, ServicesWrapper servicesWrapper) {
+	public TelegramController telegramController(chartgram.config.Configuration configuration, ChartController chartController, ITelegramBot bot, Localization localization, ServicesWrapper servicesWrapper) {
 		boolean botEnabled = configuration.getBotConfiguration().getEnabled();
-		TelegramController telegramController = new TelegramController(configuration, chartRenderer, bot, localization, servicesWrapper);
+		TelegramController telegramController = new TelegramController(configuration, chartController, bot, localization, servicesWrapper);
 		if (botEnabled) {
 			telegramController.startup();
 		}

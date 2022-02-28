@@ -1,11 +1,9 @@
 package chartgram.charts;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartUtils;
-import org.jfree.data.general.DefaultPieDataset;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -23,13 +21,11 @@ public class ChartRenderer {
 
 	private ChartRenderer(){}
 
-	public InputStream createPng() {
-		return createPng(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	public InputStream createPng(JFreeChart chart) {
+		return createPng(chart, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 	}
 
-	public InputStream createPng(int width, int height) {
-		DefaultPieDataset<String> dataset = createDataset();
-		JFreeChart chart = createChart(dataset);
+	public InputStream createPng(JFreeChart chart, int width, int height) {
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 		chartPanel.setBackground(Color.white);
@@ -55,20 +51,5 @@ public class ChartRenderer {
 		} catch (IOException ex) {
 			log.error("", ex);
 		}
-	}
-
-	private DefaultPieDataset<String> createDataset() {
-		DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
-		dataset.setValue("Apache", 52);
-		dataset.setValue("Nginx", 31);
-		dataset.setValue("IIS", 12);
-		dataset.setValue("LiteSpeed", 2);
-		dataset.setValue("Google server", 1);
-		dataset.setValue("Others", 2);
-		return dataset;
-	}
-
-	private JFreeChart createChart(DefaultPieDataset<String> dataset) {
-		return ChartFactory.createPieChart("Web servers market share", dataset, false, true, false);
 	}
 }

@@ -1,6 +1,7 @@
 package chartgram.telegram;
 
-import chartgram.charts.ChartRenderer;
+import chartgram.charts.ChartController;
+import chartgram.charts.model.Chart;
 import chartgram.config.Configuration;
 import chartgram.config.Locale;
 import chartgram.config.Localization;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -29,20 +29,20 @@ public class TelegramController {
 	private final Locale locale;
 	private final ServicesWrapper servicesWrapper;
 	private final Configuration configuration;
-	private final ChartRenderer chartRenderer;
+	private final ChartController chartController;
 
 	private Map<String, User> knownUsers;
 	private Map<String, Group> knownGroups;
 	private final Map<String, List<String>> userTelegramId2GroupMemberships;
 	private final Map<UUID, Long> groupAccessAuthorizations;
 
-	public TelegramController(Configuration configuration, ChartRenderer chartRenderer, ITelegramBot bot, Localization localization, ServicesWrapper servicesWrapper) {
+	public TelegramController(Configuration configuration, ChartController chartController, ITelegramBot bot, Localization localization, ServicesWrapper servicesWrapper) {
 		this.knownUsers = new HashMap<>();
 		this.knownGroups = new HashMap<>();
 		this.userTelegramId2GroupMemberships = new HashMap<>();
 		this.groupAccessAuthorizations = new HashMap<>();
 		this.configuration = configuration;
-		this.chartRenderer = chartRenderer;
+		this.chartController = chartController;
 		this.bot = bot;
 		String languageName = configuration.getLanguage();
 		this.locale = localization.getLocaleByLanguage(languageName);
@@ -121,12 +121,14 @@ public class TelegramController {
 					bot.sendMessageToSingleChat(locale.getLinkSentInPvtText(), groupId.toString());
 					break;
 				case CHARTS:
-					InputStream image = chartRenderer.createPng();
-					bot.sendImage(image, "caption", senderId.toString());
+					// TODO: sistemare testo
+					bot.sendMessageToSingleChat(locale.getLinkSentInPvtText(), groupId.toString());
+					Chart chart = chartController.getChart("pie", groupId.toString());
+					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
 					break;
 				case UNKNOWN:
 				default:
-					log.debug("Unrecognized command={}", update.getMessage().getText());
+					log.debug("Unknown command={}", update.getMessage().getText());
 					bot.sendMessageToSingleChat(locale.getUnknownCommandText(), groupId.toString());
 					break;
 			}
