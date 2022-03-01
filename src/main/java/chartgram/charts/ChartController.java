@@ -37,6 +37,7 @@ public class ChartController {
 		this.servicesWrapper = servicesWrapper;
 	}
 
+	// TODO: nome gruppo
 	public Chart getChart(ChartType chartType, String groupId) {
 		// TODO: test
 		groupId = "-1001246028586";
@@ -47,26 +48,25 @@ public class ChartController {
 		switch (chartType) {
 			case MESSAGES_DISTRIBUTION_BY_TYPE:
 				chart = makeMessagesDistributionByTypeChart(groupId);
-				// TODO: caption
-				caption = "PIE";
+				// TODO: aggiungere nome gruppo
+				caption = "Messages distribution by type.";
 				break;
 			case MESSAGES_WITH_RESPECT_TIME:
 				// TODO: input granularità
 				chart = makeMessagesWithRespectTimeChart(groupId, 24);
-				// TODO: caption
-				caption = "LINE_MESSAGES";
+				caption = "Messages with respect time.";
 				break;
-			case JOINS_DISTRIBUTION_RESPECT_TIME:
+			case JOINS_DISTRIBUTION_WITH_RESPECT_TIME:
 				chart = makeJoinsWithRespectTimeChart(groupId, 24);
-				caption = "LINE_JOINS";
+				caption = "Joins distribution with respect time.";
 				break;
-			case LEAVINGS_DISTRIBUTION_RESPECT_TIME:
+			case LEAVINGS_DISTRIBUTION_WITH_RESPECT_TIME:
 				chart = makeLeavingsWithRespectTimeChart(groupId, 24);
-				caption = "LINE_LEAVINGS";
+				caption = "Leavings distribution with respect time.";
 				break;
 			case JOINS_VS_LIVINGS:
 				chart = makeJoinsVsLeavingsWithRespectTimeChart(groupId, 24);
-				caption = "JOINS_VS_LEAVINGS";
+				caption = "Joins vs leavings with respect time.";
 				break;
 			default:
 				break;
