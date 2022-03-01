@@ -37,11 +37,7 @@ public class ChartController {
 		this.servicesWrapper = servicesWrapper;
 	}
 
-	// TODO: nome gruppo
 	public Chart getChart(ChartType chartType, String groupId) {
-		// TODO: test
-		groupId = "-1001246028586";
-
 		JFreeChart chart = null;
 		String caption = "";
 

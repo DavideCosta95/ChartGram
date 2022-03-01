@@ -25,6 +25,10 @@ public class GroupService {
 		return result;
 	}
 
+	public Group getFirst() {
+		return groupRepository.findFirstByIdAfter(0);
+	}
+
 	public Group getByTelegramId(String telegramId) {
 		return groupRepository.getGroupByTelegramId(telegramId);
 	}

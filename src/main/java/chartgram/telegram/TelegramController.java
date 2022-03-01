@@ -123,16 +123,7 @@ public class TelegramController {
 					break;
 				case CHARTS:
 					bot.sendMessageToSingleChat(locale.getChartsSentViaPvtText(), groupId.toString());
-					Chart chart = chartController.getChart(ChartType.MESSAGES_DISTRIBUTION_BY_TYPE, groupId.toString());
-					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
-					chart = chartController.getChart(ChartType.MESSAGES_WITH_RESPECT_TIME, groupId.toString());
-					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
-					chart = chartController.getChart(ChartType.JOINS_DISTRIBUTION_WITH_RESPECT_TIME, groupId.toString());
-					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
-					chart = chartController.getChart(ChartType.LEAVINGS_DISTRIBUTION_WITH_RESPECT_TIME, groupId.toString());
-					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
-					chart = chartController.getChart(ChartType.JOINS_VS_LIVINGS, groupId.toString());
-					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
+					sendAllCharts(senderId.toString(), groupId.toString());
 					break;
 				case UNKNOWN:
 				default:
@@ -185,7 +176,12 @@ public class TelegramController {
 		switch (command) {
 			case ANALYTICS:
 			case CHARTS:
-				bot.sendMessageToSingleChat(locale.getPrivateCommandNotAllowedText(), senderId);
+				if (configuration.isTest()) {
+					Group firstGroup = servicesWrapper.getGroupService().getFirst();
+					sendAllCharts(senderId, firstGroup == null ? "" : firstGroup.getTelegramId());
+				} else {
+					bot.sendMessageToSingleChat(locale.getPrivateCommandNotAllowedText(), senderId);
+				}
 				break;
 			case UNKNOWN:
 			default:
@@ -234,6 +230,19 @@ public class TelegramController {
 			return MessageType.GIF;
 		}
 		return MessageType.OTHER;
+	}
+
+	private void sendAllCharts(String recipientId, String groupId) {
+		Chart chart = chartController.getChart(ChartType.MESSAGES_DISTRIBUTION_BY_TYPE, groupId);
+		bot.sendImage(chart.getImage(), chart.getCaption(), recipientId);
+		chart = chartController.getChart(ChartType.MESSAGES_WITH_RESPECT_TIME, groupId);
+		bot.sendImage(chart.getImage(), chart.getCaption(), recipientId);
+		chart = chartController.getChart(ChartType.JOINS_DISTRIBUTION_WITH_RESPECT_TIME, groupId);
+		bot.sendImage(chart.getImage(), chart.getCaption(), recipientId);
+		chart = chartController.getChart(ChartType.LEAVINGS_DISTRIBUTION_WITH_RESPECT_TIME, groupId);
+		bot.sendImage(chart.getImage(), chart.getCaption(), recipientId);
+		chart = chartController.getChart(ChartType.JOINS_VS_LIVINGS, groupId);
+		bot.sendImage(chart.getImage(), chart.getCaption(), recipientId);
 	}
 
 	private void handleJoinUpdate(Update update) {
