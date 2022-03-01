@@ -24,7 +24,11 @@ public class Locale {
 	@NonNull
 	private String mustBeAdminText;
 
-	@JsonProperty("link_sent_in_pvt_text")
+	@JsonProperty("link_sent_via_pvt_text")
 	@NonNull
-	private String linkSentInPvtText;
+	private String linkSentViaPvtText;
+
+	@JsonProperty("charts_sent_via_pvt_text")
+	@NonNull
+	private String chartsSentViaPvtText;
 }

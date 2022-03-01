@@ -119,11 +119,10 @@ public class TelegramController {
 					String textToSend = webappBaseUrl + ":" + webappPort + "/webapp/groups/" + groupId + "/?authorization=" + uuid;
 					log.debug("Generated url={}", textToSend);
 					bot.sendMessageToSingleChat(textToSend, senderId.toString());
-					bot.sendMessageToSingleChat(locale.getLinkSentInPvtText(), groupId.toString());
+					bot.sendMessageToSingleChat(locale.getLinkSentViaPvtText(), groupId.toString());
 					break;
 				case CHARTS:
-					// TODO: sistemare testo
-					bot.sendMessageToSingleChat(locale.getLinkSentInPvtText(), groupId.toString());
+					bot.sendMessageToSingleChat(locale.getChartsSentViaPvtText(), groupId.toString());
 					Chart chart = chartController.getChart(ChartType.MESSAGES_DISTRIBUTION_BY_TYPE, groupId.toString());
 					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
 					chart = chartController.getChart(ChartType.MESSAGES_WITH_RESPECT_TIME, groupId.toString());
