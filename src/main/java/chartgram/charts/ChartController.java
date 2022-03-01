@@ -133,7 +133,7 @@ public class ChartController {
 
 		SortedMap<LocalDateTime, Long> time2eventsNumber = getDatasetByTemporalEvents(events, granularityInHours);
 		for (Map.Entry<LocalDateTime, Long> entry : time2eventsNumber.entrySet()) {
-			// TODO
+			// TODO: default
 			String currentValue = "";
 			if (granularityInHours == 24) {
 				currentValue = entry.getKey().getDayOfMonth() + "/" + entry.getKey().getMonthValue();
@@ -176,15 +176,20 @@ public class ChartController {
 	private SortedMap<LocalDateTime, Long> getDatasetByTemporalEvents(List<? extends TemporalEvent> events, int granularityInHours) {
 		events.sort(new TemporalEventComparator());
 		LocalDateTime earliestEventTime = events.get(0).getAt();
-		LocalDateTime threshold = earliestEventTime.plus(Duration.ofHours(granularityInHours)).minus(Duration.ofMinutes(earliestEventTime.getMinute()));
+		LocalDateTime threshold = earliestEventTime
+				.plus(Duration.ofHours(granularityInHours))
+				.minus(Duration.ofHours(earliestEventTime.getHour()))
+				.minus(Duration.ofMinutes(earliestEventTime.getMinute()))
+				.minus(Duration.ofSeconds(earliestEventTime.getSecond()));
+
 		SortedMap<LocalDateTime, Long> time2eventsNumber = new TreeMap<>();
 		for (TemporalEvent event : events) {
 			LocalDateTime currentEventTime = event.getAt();
 			if (!currentEventTime.isBefore(threshold)) {
 				threshold = threshold.plus(Duration.ofHours(granularityInHours));
 			}
-			time2eventsNumber.putIfAbsent(threshold, 0L);
-			time2eventsNumber.computeIfPresent(threshold, (k, v) -> v + 1);
+			time2eventsNumber.putIfAbsent(threshold.minus(Duration.ofHours(granularityInHours)), 0L);
+			time2eventsNumber.computeIfPresent(threshold.minus(Duration.ofHours(granularityInHours)), (k, v) -> v + 1);
 		}
 		return time2eventsNumber;
 	}
