@@ -128,7 +128,7 @@ public class TelegramController {
 					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
 					chart = chartController.getChart(ChartType.MESSAGES_WITH_RESPECT_TIME, groupId.toString());
 					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
-					chart = chartController.getChart(ChartType.JOIN_DISTRIBUTION_RESPECT_TIME, groupId.toString());
+					chart = chartController.getChart(ChartType.JOINS_DISTRIBUTION_RESPECT_TIME, groupId.toString());
 					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());
 					chart = chartController.getChart(ChartType.LEAVINGS_DISTRIBUTION_RESPECT_TIME, groupId.toString());
 					bot.sendImage(chart.getImage(), chart.getCaption(), senderId.toString());

@@ -2,6 +2,7 @@ package chartgram.charts;
 
 import chartgram.charts.model.Chart;
 import chartgram.charts.model.ChartType;
+import chartgram.model.Pair;
 import chartgram.persistence.entity.JoinEvent;
 import chartgram.persistence.entity.LeaveEvent;
 import chartgram.persistence.entity.Message;
@@ -55,7 +56,7 @@ public class ChartController {
 				// TODO: caption
 				caption = "LINE_MESSAGES";
 				break;
-			case JOIN_DISTRIBUTION_RESPECT_TIME:
+			case JOINS_DISTRIBUTION_RESPECT_TIME:
 				chart = makeJoinsWithRespectTimeChart(groupId, 24);
 				caption = "LINE_JOINS";
 				break;
@@ -113,7 +114,7 @@ public class ChartController {
 	private JFreeChart makeJoinsVsLeavingsWithRespectTimeChart(String groupId, int granularityInHours) {
 		List<LeaveEvent> leavings = servicesWrapper.getLeaveEventService().getAllByGroupTelegramId(groupId);
 		List<JoinEvent> joins = servicesWrapper.getJoinEventService().getAllByGroupTelegramId(groupId);
-		DefaultCategoryDataset dataset = createMultilineDataset(leavings, joins, granularityInHours, "leavings", "joins");
+		DefaultCategoryDataset dataset = createMultilineDataset(List.of(new Pair<>(leavings, "leavings"), new Pair<>(joins, "joins")), granularityInHours);
 		return ChartFactory.createLineChart("Groups leavings with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false);
 	}
 
@@ -145,39 +146,28 @@ public class ChartController {
 		return dataset;
 	}
 
-	// TODO: generalizza per n series
-	private DefaultCategoryDataset createMultilineDataset(List<? extends TemporalEvent> eventsA, List<? extends TemporalEvent> eventsB, int granularityInHours, String eventNameInLegendA, String eventNameInLegendB) {
+	private DefaultCategoryDataset createMultilineDataset(List<Pair<List<? extends TemporalEvent>, String>> eventsDatasets, int granularityInHours) {
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-		if (eventsA.isEmpty()) {
-			dataset.addValue(100, eventNameInLegendA, "");
-		} else {
-			SortedMap<LocalDateTime, Long> time2eventsNumberA = getDatasetByTemporalEvents(eventsA, granularityInHours);
-			for (Map.Entry<LocalDateTime, Long> entry : time2eventsNumberA.entrySet()) {
-				// TODO
-				String currentValue = "";
-				if (granularityInHours == 24) {
-					currentValue = entry.getKey().getDayOfMonth() + "/" + entry.getKey().getMonthValue();
-				}
-				if (granularityInHours == 1) {
-					currentValue = entry.getKey().getHour() + ":" + entry.getKey().getMinute();
-				}
-				dataset.addValue(entry.getValue(), eventNameInLegendA, currentValue);
-			}
+		if (eventsDatasets.stream().map(Pair::getFirst).allMatch(List::isEmpty)) {
+			eventsDatasets.forEach( e -> dataset.addValue(100, e.getSecond(), ""));
 		}
-		if (eventsB.isEmpty()) {
-			dataset.addValue(100, eventNameInLegendB, "");
-		} else {
-			SortedMap<LocalDateTime, Long> time2eventsNumberB = getDatasetByTemporalEvents(eventsB, granularityInHours);
-			for (Map.Entry<LocalDateTime, Long> entry : time2eventsNumberB.entrySet()) {
-				// TODO
-				String currentValue = "";
-				if (granularityInHours == 24) {
-					currentValue = entry.getKey().getDayOfMonth() + "/" + entry.getKey().getMonthValue();
+
+		for(Pair<List<? extends TemporalEvent>, String> eventsDataset : eventsDatasets) {
+			if (eventsDataset.getFirst().isEmpty()) {
+				dataset.addValue(1, eventsDataset.getSecond(), "");
+			} else {
+				SortedMap<LocalDateTime, Long> time2eventsNumberA = getDatasetByTemporalEvents(eventsDataset.getFirst(), granularityInHours);
+				for (Map.Entry<LocalDateTime, Long> entry : time2eventsNumberA.entrySet()) {
+					// TODO: default + duplicazione codice con metodo sopra
+					String currentValue = "";
+					if (granularityInHours == 24) {
+						currentValue = entry.getKey().getDayOfMonth() + "/" + entry.getKey().getMonthValue();
+					}
+					if (granularityInHours == 1) {
+						currentValue = entry.getKey().getHour() + ":" + entry.getKey().getMinute();
+					}
+					dataset.addValue(entry.getValue(), eventsDataset.getSecond(), currentValue);
 				}
-				if (granularityInHours == 1) {
-					currentValue = entry.getKey().getHour() + ":" + entry.getKey().getMinute();
-				}
-				dataset.addValue(entry.getValue(), eventNameInLegendB, currentValue);
 			}
 		}
 		return dataset;
@@ -188,7 +178,6 @@ public class ChartController {
 		LocalDateTime earliestEventTime = events.get(0).getAt();
 		LocalDateTime threshold = earliestEventTime.plus(Duration.ofHours(granularityInHours)).minus(Duration.ofMinutes(earliestEventTime.getMinute()));
 		SortedMap<LocalDateTime, Long> time2eventsNumber = new TreeMap<>();
-
 		for (TemporalEvent event : events) {
 			LocalDateTime currentEventTime = event.getAt();
 			if (!currentEventTime.isBefore(threshold)) {
