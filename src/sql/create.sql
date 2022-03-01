@@ -103,6 +103,7 @@ create table messages
             on update cascade on delete cascade
 );
 
+
 create table users_in_groups
 (
     user_id bigint NOT NULL
@@ -115,3 +116,13 @@ create table users_in_groups
             on update cascade on delete cascade,
     PRIMARY KEY (user_id, group_id)
 );
+
+
+-- setup enum values for message_types table --
+INSERT INTO message_types(type) VALUES ('text');
+INSERT INTO message_types(type) VALUES ('audio');
+INSERT INTO message_types(type) VALUES ('photo');
+INSERT INTO message_types(type) VALUES ('sticker');
+INSERT INTO message_types(type) VALUES ('video');
+INSERT INTO message_types(type) VALUES ('gif');
+INSERT INTO message_types(type) VALUES ('other');
