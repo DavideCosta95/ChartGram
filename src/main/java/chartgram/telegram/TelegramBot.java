@@ -135,6 +135,7 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 		onLeavingUserHandlers.forEach(e -> e.accept(update));
 	}
 
+	// TODO: introdurre MessageController
 	public Message sendMessageToSingleChat(String textToSend, String recipientId) {
 		if (textToSend.trim().isBlank()) {
 			return null;

@@ -93,10 +93,16 @@ public class TelegramController {
 
 	private Command getCommandByString(String text) {
 		// TODO: migliorare con factory
-		if (text.contains("/analytics")) {
+		if (text.contains(configuration.getBotConfiguration().getStartCommand())) {
+			return Command.START;
+		}
+		if (text.contains(configuration.getBotConfiguration().getHelpCommand())) {
+			return Command.HELP;
+		}
+		if (text.contains(configuration.getBotConfiguration().getAnalyticsCommand())) {
 			return Command.ANALYTICS;
 		}
-		if (text.contains("/charts")) {
+		if (text.contains(configuration.getBotConfiguration().getChartsCommand())) {
 			return Command.CHARTS;
 		}
 		return Command.UNKNOWN;
@@ -109,6 +115,14 @@ public class TelegramController {
 
 		if (isGroupAdmin) {
 			switch (command) {
+				case START:
+					bot.sendMessageToSingleChat(locale.getGenericSentViaPvtText(), groupId.toString());
+					bot.sendMessageToSingleChat(locale.getStartCommandText(), senderId.toString());
+					break;
+				case HELP:
+					bot.sendMessageToSingleChat(locale.getGenericSentViaPvtText(), groupId.toString());
+					bot.sendMessageToSingleChat(locale.getHelpCommandText(), senderId.toString());
+					break;
 				case ANALYTICS:
 					UUID uuid = UUID.randomUUID();
 					groupAccessAuthorizations.put(uuid, groupId);
@@ -174,7 +188,22 @@ public class TelegramController {
 		Command command = getCommandByString(update.getMessage().getText());
 		String senderId = update.getMessage().getFrom().getId().toString();
 		switch (command) {
+			case START:
+				bot.sendMessageToSingleChat(locale.getStartCommandText(), senderId);
+				break;
+			case HELP:
+				bot.sendMessageToSingleChat(locale.getHelpCommandText(), senderId);
+				break;
 			case ANALYTICS:
+				if (configuration.isTest()) {
+					Group firstGroup = servicesWrapper.getGroupService().getFirst();
+					String textToSend = configuration.getWebappConfiguration().getBaseUrl() + ":" + configuration.getWebappConfiguration().getPort() + "/webapp/groups/" + firstGroup.getTelegramId();
+					log.debug("Generated url={}", textToSend);
+					bot.sendMessageToSingleChat(textToSend, senderId);
+				} else {
+					bot.sendMessageToSingleChat(locale.getPrivateCommandNotAllowedText(), senderId);
+				}
+				break;
 			case CHARTS:
 				if (configuration.isTest()) {
 					Group firstGroup = servicesWrapper.getGroupService().getFirst();

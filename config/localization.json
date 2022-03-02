@@ -2,22 +2,28 @@
   "locales": [
     {
       "italian": {
+        "start_command_text": "ChartGram è il bot che ti aiuta nella gestione dei gruppi fornendoti statistiche tramite grafici :D\nUsa /help per la lista dei comandi disponibili.",
+        "help_command_text": "Usa i seguenti comandi nel gruppo del quale si vogliono ricevere le statistiche:\n/analytics - accedi ad una pagina web contenente i grafici riguardo le attività del tuo gruppo.\n/charts - ricevi direttamente su Telegram dei grafici riguardanti le attività del tuo gruppo.",
         "non_command_text": "Usa /help per l'elenco dei comandi disponibili.",
         "private_command_not_allowed_text": "Questo comando deve essere usato in un gruppo.",
         "unknown_command_text": "Comando non riconosciuto.",
         "must_be_admin_text": "Devi essere un amministratore del gruppo per usare questo comando.",
         "link_sent_via_pvt_text": "Il link ti è stato inviato in privato.",
-        "charts_sent_via_pvt_text": "I grafici ti sono stati inviati in privato."
+        "charts_sent_via_pvt_text": "I grafici ti sono stati inviati in privato.",
+        "generic_sent_via_pvt_text": "Risposta inviata in privato."
       }
     },
     {
       "english": {
+        "start_command_text": "ChartGram is the bot which helps you to manage your groups giving you analytics through graphs :D\nUse /help for the available commands list.",
+        "help_command_text": "Use the following commands in the group you are interested to receive the analytics about:\n/analytics - access to a web page containing graphs about your group's activities.\n/charts - receive directly on Telegram graphs about your group's activities.",
         "non_command_text": "Use /help for available commands list.",
         "private_command_not_allowed_text": "This command must be used in a group.",
         "unknown_command_text": "Command not recognized.",
         "must_be_admin_text": "You must be an administrator of the group to use this command.",
         "link_sent_via_pvt_text": "Link sent via private message.",
-        "charts_sent_via_pvt_text": "Charts sent via private message."
+        "charts_sent_via_pvt_text": "Charts sent via private message.",
+        "generic_sent_via_pvt_text": "Response sent via private message"
       }
     }
   ]

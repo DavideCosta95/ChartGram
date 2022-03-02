@@ -9,6 +9,8 @@
     "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     "start_command": "/start",
     "help_command": "/help",
+    "analytics_command": "/analytics",
+    "charts_command": "/charts",
     "ignore_non_commands_messages": false,
     "developers_ids": [
       123456789

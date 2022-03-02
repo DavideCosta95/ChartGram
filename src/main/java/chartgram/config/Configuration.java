@@ -67,6 +67,14 @@ public class Configuration {
 		@NonNull
 		private String helpCommand;
 
+		@JsonProperty("analytics_command")
+		@NonNull
+		private String analyticsCommand;
+
+		@JsonProperty("charts_command")
+		@NonNull
+		private String chartsCommand;
+
 		@JsonProperty("ignore_non_commands_messages")
 		private Boolean ignoreNonCommandsMessages;
 

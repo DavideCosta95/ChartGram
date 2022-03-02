@@ -8,6 +8,14 @@ import lombok.NonNull;
 @Data
 @NoArgsConstructor
 public class Locale {
+	@JsonProperty("start_command_text")
+	@NonNull
+	private String startCommandText;
+
+	@JsonProperty("help_command_text")
+	@NonNull
+	private String helpCommandText;
+
 	@JsonProperty("non_command_text")
 	@NonNull
 	private String nonCommandText;
@@ -31,4 +39,8 @@ public class Locale {
 	@JsonProperty("charts_sent_via_pvt_text")
 	@NonNull
 	private String chartsSentViaPvtText;
+
+	@JsonProperty("generic_sent_via_pvt_text")
+	@NonNull
+	private String genericSentViaPvtText;
 }
