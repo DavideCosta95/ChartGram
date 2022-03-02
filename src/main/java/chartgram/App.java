@@ -9,6 +9,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.TimeZone;
 
 @SpringBootApplication
@@ -17,6 +21,7 @@ public class App implements ApplicationRunner {
     private ApplicationContext context;
 
     public static void main(String[] args) {
+        setupConfigurationFiles();
         SpringApplication.run(App.class, args);
     }
 
@@ -26,6 +31,22 @@ public class App implements ApplicationRunner {
         TimeZone.setDefault(TimeZone.getTimeZone(configuration.getTimezone()));
         if (configuration.isTest()) {
             log.warn("Test mode enabled! API won't ask for authorization");
+        }
+    }
+
+    public static void setupConfigurationFiles() {
+        File[] configurationFiles = { new File("./config/application.json"), new File("./config/configuration.json") };
+        for (File configurationFile : configurationFiles) {
+            if (!configurationFile.exists()) {
+                try {
+                    Path createdFile = Files.copy(Path.of(configurationFile.getPath() + ".example"), Path.of(configurationFile.getPath()));
+                    log.info("Created {} from example file", createdFile);
+                } catch (IOException e) {
+                    log.error("Error while creating {} from example file", configurationFile.getPath(), e);
+                }
+            } else {
+                log.info("Loaded {}", configurationFile.getPath());
+            }
         }
     }
 
