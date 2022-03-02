@@ -11,6 +11,6 @@
 
 - Open [BotFather's chat](https://t.me/botfather).
 - Create a new bot using `/newbot` command.
-- Copy the API token returned by BotFather at the end of the bot creation process and paste it to the `bot.token`
+- Copy the API token returned by BotFather at the end of the bot creation process and paste it into the `bot.token`
   property in `./config/configuration.json`.
-- In `./config/configuration.json` set `bot.enabled` property to `true`.
+- Edit `./config/configuration.json` setting `bot.enabled` property to `true`.
