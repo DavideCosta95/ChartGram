@@ -7,7 +7,7 @@
   },
   "spring": {
     "datasource": {
-      "url": "jdbc:postgresql://url.to.db:5432/db_name?user=XXXXXX&password=XXXXX"
+      "url": "jdbc:postgresql://localhost:5432/chartgram?user=root&password=password"
     },
     "jpa": {
       "properties": {

@@ -3,7 +3,7 @@
   "language": "italian",
   "timezone": "Europe/Rome",
   "bot": {
-    "enabled": true,
+    "enabled": false,
     "name": "ChartGram",
     "username": "ChartGramBot",
     "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
