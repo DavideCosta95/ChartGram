@@ -1,4 +1,4 @@
-#<div style="text-align:center">ChartGram</div>
+#ChartGram
 ## Description
 
 TODO
