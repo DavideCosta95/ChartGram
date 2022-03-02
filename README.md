@@ -2,14 +2,14 @@
 
 ## Description
 
-TODO
+[User guide](/assets/docs/user_guide.md)
 
 ## Usage
 
 - ### Database setup
     - Run `docker-compose up -d` from the project root to run a local ready-to-use PostgreSQL DBMS instance, with also
       pre-loaded example data.
-    - To use a custom RDBMS instance see [advanced configuration](/assets/docs/advanced_configuration.md).
+    - To use a custom RDBMS instance see [advanced setup](/assets/docs/advanced_setup.md).
 
 - ### Run
     - #### From distributable jar
@@ -23,5 +23,3 @@ TODO
     - #### Build from sources and run from generated artifact
         - Run `./gradlew build` from project root.
         - Run `java -jar ./build/libs/ChartGram*.jar` from project root.
-
-# [User guide](/assets/docs/user_guide.md)
