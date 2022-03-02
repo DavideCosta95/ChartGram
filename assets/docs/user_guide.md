@@ -1,6 +1,6 @@
 # Configuration files
 
-Application uses four configuration files:
+ChartGram uses four configuration files:
 
 - `application.json`
     - logging configuration file path
@@ -12,7 +12,7 @@ Application uses four configuration files:
     - language used for template messages (must be present an entry key with the same name in `localization.json`)
     - preferred timezone in a compatible format (
       see [documentation](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/TimeZone.html#getTimeZone(java.lang.String)))
-    - bot enabled flag to disable bot functionalities (i.e. if you have not a bot API token)
+    - bot enabled flag to disable bot functionalities (i.e. if one has not a bot API token)
     - bot's name, username and token
       from [Telegram bot setup process](/assets/docs/advanced_setup.md#telegram-bot-setup-telegram-account-needed) (
       ignored if `bot.enabled` is `false`)
@@ -36,7 +36,14 @@ To disable authentication for API use, set `"test": false` in `./config/configur
 
 # Test mode
 
-TODO
+Setting `"test": false` in `./config/configuration.json` will produce two effects:
+- API will not ask for an [authorization token](/assets/docs/user_guide.md#api) to retrieve data.
+- Using `analytics_command` (default=`/analytics`) and `charts_command` (default=`/charts`), both in `./config/configuration.json`, in a private chat with the bot would normally lead to an error message but in this mode the bot will send to the user respectively:
+  - `analytics_command` a link to the webapp to view an example group data (the data of the group with the lowest id in the database, technically).
+  - `charts_command` all the implemented charts, representing an example group data, like stated in the previous point
+
+
+In this mode, one will be able to see an arbitrary group data via API and using bot's commands, changing at will the group id in the url.
 
 # Database E/R diagram:
 
