@@ -9,8 +9,7 @@
 
 # Telegram bot setup (Telegram account needed)
 
-- Open [BotFather's chat](https://t.me/botfather).
+- Open [BotFather's chat](https://t.me/botfather) on Telegram.
 - Create a new bot using `/newbot` command.
-- Copy the API token returned by BotFather at the end of the bot creation process and paste it into the `bot.token`
-  property in `./config/configuration.json`.
+- Copy the API token returned by BotFather at the end of the bot creation process and paste it into the `bot.token` property in `./config/configuration.json`.
 - Edit `./config/configuration.json` setting `bot.enabled` property to `true`.

@@ -1,36 +1,36 @@
-# Configuration files
+# Test mode
 
-ChartGram uses four configuration files:
+Setting `"test": false` in `./config/configuration.json` will produce two effects:
+- API will not ask for an [authorization token](/assets/docs/user_guide.md#authentication) to retrieve data.
+- Using `analytics_command` (default=`/analytics`) and `charts_command` (default=`/charts`), both in `./config/configuration.json`, in a private chat with the bot would normally lead to an error message but in this mode the bot will send to the user respectively:
+  - `analytics_command` a link to the webapp to view an example group data (the data of the group with the lowest id in the database, technically).
+  - `charts_command` all the implemented charts, representing an example group data, like stated in the previous point.
 
-- `application.json`
-    - logging configuration file path
-    - webapp and REST API connection port
-    - database jdbc url
-    - hibernate default schema
-- `configuration.json`
-    - test flag to enable [test mode](/assets/docs/user_guide.md#test-mode)
-    - language used for template messages (must be present an entry key with the same name in `localization.json`)
-    - preferred timezone in a compatible format (
-      see [documentation](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/TimeZone.html#getTimeZone(java.lang.String)))
-    - bot enabled flag to disable bot functionalities (i.e. if one has not a bot API token)
-    - bot's name, username and token
-      from [Telegram bot setup process](/assets/docs/advanced_setup.md#telegram-bot-setup-telegram-account-needed) (
-      ignored if `bot.enabled` is `false`)
-    - string mappings for bot commands
-    - ignore non commands messages flag to avoid sending responses to non-command messages from users
-    - developers id list for bot startup message and error reporting
-    - base url for domain customization to access webapp and API via generated urls
-- `localization.json`
-    - localization strings used in Telegram bot messages templates
-- `logback.xml`
-    - logging configuration
-
-All the properties contained in such configuration files are NOT hot swappable, you need to relaunch the application
-before changes take effect.
+In this mode, one will be able to see an arbitrary group data via API and using bot's commands, changing at will the group id in the url.
 
 # Telegram groups features usage
 
-TODO
+In order to collect data and generate relative charts:
+- Perform the [Telegram bot setup](/assets/docs/advanced_setup.md#telegram-bot-setup-telegram-account-needed)
+- Press the "Start" button in the bot chat
+- Add the bot to the desired group
+- Promote it to administrator (needed to see all messages and events in the group)
+- [Run the application](/README.md#usage)
+
+The bot will store information about people joining/leaving the group and about the messages sent into it, according to the [data model](/assets/docs/user_guide.md#database-er-diagram).
+To retrieve this data, three ways are available, with respective returned data format:
+- Through [API](/assets/docs/user_guide.md#api)
+  - JSON array
+- Using `analytics_command` from the bot
+  - url to browse data on webapp
+- Using `charts_command` from the bot
+  - rendered charts images sent via Telegram
+
+Bot commands must be used in the group which one is interested in.
+
+#### N.B.: With [test mode](/assets/docs/user_guide.md#test-mode) disabled, only group administrators are able to access their group's data.
+
+Bot interactions example screens available [here](/assets/docs/example_screens.md#chart-images-rendered-by-bot).
 
 # API
 
@@ -40,7 +40,8 @@ To disable authentication for API use, set `"test": false` in `./config/configur
 
 ## Endpoints
 
-The following endpoints are served from the base path (i.e. by default `localhost:8080`) and all return JSON arrays of object, with respect to the respective endpoint purpose:
+The following endpoints are served from the base path (i.e. by default `localhost:8080`) and all return JSON arrays of object, with respect to the respective endpoint purpose.
+All the calls must be performed by `HTTP GET` requests.
 
 - `/api/groups/{groupId}/users`
   - example response:
@@ -150,22 +151,35 @@ For this base version of the application, the only way to obtain an authorizatio
 The aforesaid token will be added as `authorization` query param in the generated url.
 An example of said url is the following: `http://localhost:8080/webapp/groups/-1001338226930/?authorization=31ff6c8e-6373-4324-a810-5c10f9cc28a9`
 
-# Test mode
-
-Setting `"test": false` in `./config/configuration.json` will produce two effects:
-- API will not ask for an [authorization token](/assets/docs/user_guide.md#api) to retrieve data.
-- Using `analytics_command` (default=`/analytics`) and `charts_command` (default=`/charts`), both in `./config/configuration.json`, in a private chat with the bot would normally lead to an error message but in this mode the bot will send to the user respectively:
-  - `analytics_command` a link to the webapp to view an example group data (the data of the group with the lowest id in the database, technically).
-  - `charts_command` all the implemented charts, representing an example group data, like stated in the previous point.
-  
-In this mode, one will be able to see an arbitrary group data via API and using bot's commands, changing at will the group id in the url.
-
-# Assets
-
 ## Database E/R diagram:
 
 ![DB E/R schema](/assets/images/db_er_schema.png)
 
-## Example screens
+# Configuration files
 
-TODO
+ChartGram uses four configuration files:
+
+- `application.json`
+  - logging configuration file path
+  - webapp and REST API connection port
+  - database jdbc url
+  - hibernate default schema
+- `configuration.json`
+  - test flag to enable [test mode](/assets/docs/user_guide.md#test-mode)
+  - language used for template messages (must be present an entry key with the same name in `localization.json`)
+  - preferred timezone in a compatible format (see [documentation](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/TimeZone.html#getTimeZone(java.lang.String)))
+  - bot enabled flag to disable bot functionalities (i.e. if one has not a bot API token)
+  - bot's name, username and token
+    from [Telegram bot setup process](/assets/docs/advanced_setup.md#telegram-bot-setup-telegram-account-needed) (
+    ignored if `bot.enabled` is `false`)
+  - string mappings for bot commands
+  - ignore non commands messages flag to avoid sending responses to non-command messages from users
+  - developers id list for bot startup message and error reporting
+  - base url for domain customization to access webapp and API via generated urls
+- `localization.json`
+  - localization strings used in Telegram bot messages templates
+- `logback.xml`
+  - logging configuration
+
+All the properties contained in such configuration files are NOT hot swappable, you need to relaunch the application
+before changes take effect.
