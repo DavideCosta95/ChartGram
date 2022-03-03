@@ -20,7 +20,7 @@ create table groups
         constraint groups_pk
             primary key,
     telegram_id varchar not null,
-    description varchar,
+    title varchar not null,
     inserted_at timestamp not null
 );
 

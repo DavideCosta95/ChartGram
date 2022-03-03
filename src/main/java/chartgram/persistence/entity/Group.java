@@ -20,16 +20,17 @@ public class Group {
 	@NonNull
 	private String telegramId;
 
-	@Column(name="description")
-	private String description;
+	@Column(name="title", nullable = false)
+	@NonNull
+	private String title;
 
 	@Column(name="inserted_at", nullable = false)
 	@NonNull
 	private LocalDateTime insertedAt;
 
-	public Group(@NonNull String telegramId, String description, @NonNull LocalDateTime insertedAt) {
+	public Group(@NonNull String telegramId, @NonNull String title, @NonNull LocalDateTime insertedAt) {
 		this.telegramId = telegramId;
-		this.description = description;
+		this.title = title;
 		this.insertedAt = insertedAt;
 	}
 }

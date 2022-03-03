@@ -75,7 +75,7 @@ public class TelegramController {
 		org.telegram.telegrambots.meta.api.objects.Message incomingMessage = update.getMessage();
 		String text = incomingMessage.getText();
 
-		Group group = new Group(groupId, update.getMessage().getChat().getDescription(), now);
+		Group group = new Group(groupId, update.getMessage().getChat().getTitle(), now);
 		group = addKnownGroup(group);
 
 		User user = new User(sender.getId().toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName(), now);
@@ -111,6 +111,7 @@ public class TelegramController {
 	private void handleGroupCommand(Update update, Command command) {
 		Long senderId = update.getMessage().getFrom().getId();
 		Long groupId = update.getMessage().getChatId();
+		String groupTitle = update.getMessage().getChat().getTitle();
 		boolean isGroupAdmin = bot.getAGroupAdmins(groupId).contains(senderId);
 
 		if (isGroupAdmin) {
@@ -137,7 +138,7 @@ public class TelegramController {
 					break;
 				case CHARTS:
 					bot.sendMessageToSingleChat(locale.getChartsSentViaPvtText(), groupId.toString());
-					sendAllCharts(senderId.toString(), groupId.toString());
+					sendAllCharts(senderId.toString(), groupId.toString(), groupTitle);
 					break;
 				case UNKNOWN:
 				default:
@@ -207,7 +208,11 @@ public class TelegramController {
 			case CHARTS:
 				if (configuration.isTest()) {
 					Group firstGroup = servicesWrapper.getGroupService().getFirst();
-					sendAllCharts(senderId, firstGroup == null ? "" : firstGroup.getTelegramId());
+					if (firstGroup == null) {
+						sendAllCharts(senderId, "", "");
+					} else {
+						sendAllCharts(senderId, firstGroup.getTelegramId(), firstGroup.getTitle());
+					}
 				} else {
 					bot.sendMessageToSingleChat(locale.getPrivateCommandNotAllowedText(), senderId);
 				}
@@ -261,16 +266,16 @@ public class TelegramController {
 		return MessageType.OTHER;
 	}
 
-	private void sendAllCharts(String recipientId, String groupId) {
-		Chart chart = chartController.getChart(ChartType.MESSAGES_DISTRIBUTION_BY_TYPE, groupId);
+	private void sendAllCharts(String recipientId, String groupId, String groupTitle) {
+		Chart chart = chartController.getChart(ChartType.MESSAGES_DISTRIBUTION_BY_TYPE, groupId, groupTitle);
 		bot.sendImage(chart.getImage(), chart.getCaption(), recipientId);
-		chart = chartController.getChart(ChartType.MESSAGES_WITH_RESPECT_TIME, groupId);
+		chart = chartController.getChart(ChartType.MESSAGES_WITH_RESPECT_TIME, groupId, groupTitle);
 		bot.sendImage(chart.getImage(), chart.getCaption(), recipientId);
-		chart = chartController.getChart(ChartType.JOINS_DISTRIBUTION_WITH_RESPECT_TIME, groupId);
+		chart = chartController.getChart(ChartType.JOINS_DISTRIBUTION_WITH_RESPECT_TIME, groupId, groupTitle);
 		bot.sendImage(chart.getImage(), chart.getCaption(), recipientId);
-		chart = chartController.getChart(ChartType.LEAVINGS_DISTRIBUTION_WITH_RESPECT_TIME, groupId);
+		chart = chartController.getChart(ChartType.LEAVINGS_DISTRIBUTION_WITH_RESPECT_TIME, groupId, groupTitle);
 		bot.sendImage(chart.getImage(), chart.getCaption(), recipientId);
-		chart = chartController.getChart(ChartType.JOINS_VS_LIVINGS, groupId);
+		chart = chartController.getChart(ChartType.JOINS_VS_LIVINGS, groupId, groupTitle);
 		bot.sendImage(chart.getImage(), chart.getCaption(), recipientId);
 	}
 
@@ -279,7 +284,7 @@ public class TelegramController {
 		String groupId = update.getMessage().getChatId().toString();
 		LocalDateTime now = LocalDateTime.now();
 
-		Group group = new Group(groupId, update.getMessage().getChat().getDescription(), now);
+		Group group = new Group(groupId, update.getMessage().getChat().getTitle(), now);
 		final Group persistedGroup = addKnownGroup(group);
 
 		List<JoinEvent> joinEvents = new ArrayList<>(update.getMessage().getNewChatMembers().size());
@@ -310,7 +315,7 @@ public class TelegramController {
 		String groupId = update.getMessage().getChatId().toString();
 		LocalDateTime now = LocalDateTime.now();
 
-		Group group = new Group(groupId, update.getMessage().getChat().getDescription(), now);
+		Group group = new Group(groupId, update.getMessage().getChat().getTitle(), now);
 		group = addKnownGroup(group);
 
 		org.telegram.telegrambots.meta.api.objects.User leavingUser = update.getMessage().getLeftChatMember();
@@ -402,8 +407,8 @@ public class TelegramController {
 			knownGroups.put(persistedGroup.getTelegramId(), persistedGroup);
 			cachedGroup = persistedGroup;
 		} else {
-			if (!Objects.equals(cachedGroup.getDescription(), group.getDescription())) {
-				cachedGroup.setDescription(group.getDescription());
+			if (!Objects.equals(cachedGroup.getTitle(), group.getTitle())) {
+				cachedGroup.setTitle(group.getTitle());
 				cachedGroup = servicesWrapper.getGroupService().add(cachedGroup);
 			}
 		}
