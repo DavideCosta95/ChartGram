@@ -1,6 +1,6 @@
 {
   "test": true,
-  "language": "italian",
+  "language": "english",
   "timezone": "Europe/Rome",
   "bot": {
     "enabled": false,
