@@ -33,16 +33,26 @@ Bot commands must be used in the group which one is interested in.
 
 Bot interactions example screens available [here](/assets/docs/example_screens.md).
 
+# Webapp
+Collected data is available also on a webapp, reachable at `http://<BASE_URL>:<PORT>/webapp/groups/{groupId}/?authorization={token}`.  
+To configure `BASE_URL` and `PORT` in said url, go to [configuration files](/assets/docs/user_guide.md#configuration-files) guide section.  
+More information about authorization available [here](/assets/docs/user_guide.md#authentication).  
+The `{groupId}` path variable represents the Telegram id of the group which is querying for.  
+It must match the group id mapped by the authorization `token` present as query param, more details in the [authentication section](/assets/docs/user_guide.md#authentication).  
+
+About the security layer, it is demanded to a reverse-proxy, to be placed architecturally between the application and the extern.  
+Like this, the system is more modular, and it's possible to restart this entry point without impacting the application, other than being able to change cipher key and various tunings.  
+
 # API
 
 The application exposes a REST API to access collected data.  
 By default, an authentication is needed to perform requests to such API.  
-To disable authentication for API use, set `"test": true` in `./config/configuration.json`, with reference to [test mode](/assets/docs/user_guide.md#test-mode).
+To disable authentication for API use, set `"test": true` in `./config/configuration.json`, with reference to [test mode](/assets/docs/user_guide.md#test-mode).  
 
 ## Endpoints
 
 The following endpoints are served from the base path (i.e. by default `localhost:8080`) and all return JSON arrays of object, with respect to the respective endpoint purpose.  
-All the calls must be performed by `HTTP GET` requests.
+All the calls must be performed by `HTTP GET` requests.  
 
 - `/api/groups/{groupId}/users`
   - example response:
@@ -151,7 +161,7 @@ All the calls must be performed by `HTTP GET` requests.
   ```
 
 The `{groupId}` path variable represents the Telegram id of the group which is querying for.  
-It must match the group id mapped by the authorization token of the bearer, more details in the [authentication section](/assets/docs/user_guide.md#authentication).
+It must match the group id mapped by the authorization token of the bearer, more details in the [authentication section](/assets/docs/user_guide.md#authentication).  
 
 ## Authentication
 
@@ -163,7 +173,7 @@ This can be done in two equivalent ways:
 For this base version of the application, the only way to obtain an authorization token is to use the bot's `analytics_command`.  
 The aforesaid token will be added as `authorization` query param in the generated url.  
 An example of said url is the following:  
-`http://localhost:8080/webapp/groups/-1001338226930/?authorization=31ff6c8e-6373-4324-a810-5c10f9cc28a9`
+`http://localhost:8080/webapp/groups/-1001338226930/?authorization=31ff6c8e-6373-4324-a810-5c10f9cc28a9`  
 
 ## Database E/R diagram:
 

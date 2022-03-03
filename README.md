@@ -35,3 +35,8 @@ Example screens of the application available [here](/assets/docs/example_screens
     - #### Build from sources and run from generated artifact
         - Run `./gradlew build` from project root.
         - Run `java -jar ./build/libs/ChartGram*.jar` from project root.
+
+## Public instance
+
+An up and running public instance is available for free [here](https://t.me/ChartGramBot).  
+It's hosted on `chartgram.ddns.net`, with [test mode](/assets/docs/user_guide.md#test-mode) disabled.
