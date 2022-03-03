@@ -43,7 +43,7 @@ public class ChartRenderer {
 		}
 	}
 
-	private void saveToFile(String fileName, JFreeChart chart) {
+	public void saveToFile(String fileName, JFreeChart chart) {
 		try {
 			String path = "";
 			OutputStream out = new FileOutputStream(path + "/" + fileName);

@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,43 +38,42 @@ public class ChartController {
 		this.servicesWrapper = servicesWrapper;
 	}
 
-	public Chart getChart(ChartType chartType, String groupId) {
+	public Chart getChart(ChartType chartType, String groupId, String groupTitle) {
 		JFreeChart chart = null;
 		String caption = "";
 
 		switch (chartType) {
 			case MESSAGES_DISTRIBUTION_BY_TYPE:
 				chart = makeMessagesDistributionByTypeChart(groupId);
-				// TODO: aggiungere nome gruppo
-				caption = "Messages distribution by type.";
+				caption = "Messages distribution by type of group \"" + groupTitle + "\".";
 				break;
 			case MESSAGES_WITH_RESPECT_TIME:
 				// TODO: input granularità
 				chart = makeMessagesWithRespectTimeChart(groupId, 24);
-				caption = "Messages with respect time.";
+				caption = "Messages with respect time of group \"" + groupTitle + "\".";
 				break;
 			case JOINS_DISTRIBUTION_WITH_RESPECT_TIME:
 				chart = makeJoinsWithRespectTimeChart(groupId, 24);
-				caption = "Joins distribution with respect time.";
+				caption = "Joins distribution with respect time of group \"" + groupTitle + "\".";
 				break;
 			case LEAVINGS_DISTRIBUTION_WITH_RESPECT_TIME:
 				chart = makeLeavingsWithRespectTimeChart(groupId, 24);
-				caption = "Leavings distribution with respect time.";
+				caption = "Leavings distribution with respect time of group \"" + groupTitle + "\".";
 				break;
 			case JOINS_VS_LIVINGS:
 				chart = makeJoinsVsLeavingsWithRespectTimeChart(groupId, 24);
-				caption = "Joins vs leavings with respect time.";
+				caption = "Joins vs leavings with respect time of group \"" + groupTitle + "\".";
 				break;
 			default:
 				break;
 		}
-		// TODO: vedere caratteristiche estetiche del grafico
 		InputStream image = chartRenderer.createPng(chart);
 		return new Chart(image, caption);
 	}
 
 	private JFreeChart makeMessagesDistributionByTypeChart(String groupId) {
 		List<Message> messages = servicesWrapper.getMessageService().getAllByGroupTelegramId(groupId);
+		long messagesCount = messages.size();
 		EnumMap<MessageType, Long> messageType2Count = new EnumMap<>(MessageType.class);
 		for (Message message : messages) {
 			MessageType currentKey = MessageType.getTypeById(message.getType());
@@ -82,7 +82,11 @@ public class ChartController {
 		}
 		Map<String, Long> datasetMap = messageType2Count.entrySet().stream()
 				.collect(Collectors.toMap(
-						e -> e.getKey().toString().toLowerCase() + ": " + e.getValue(),
+						e -> {
+							double percentage = (e.getValue() / (double) messagesCount) * 100;
+							String percentageString = String.format("%.2f", percentage);
+							return e.getKey().toString().toLowerCase() + " " + percentageString + "%";
+						},
 						Map.Entry::getValue
 				));
 		DefaultPieDataset<String> dataset = createPieDataset(datasetMap);
@@ -111,7 +115,7 @@ public class ChartController {
 		List<LeaveEvent> leavings = servicesWrapper.getLeaveEventService().getAllByGroupTelegramId(groupId);
 		List<JoinEvent> joins = servicesWrapper.getJoinEventService().getAllByGroupTelegramId(groupId);
 		DefaultCategoryDataset dataset = createMultilineDataset(List.of(new Pair<>(leavings, "leavings"), new Pair<>(joins, "joins")), granularityInHours);
-		return ChartFactory.createLineChart("Groups leavings with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false);
+		return ChartFactory.createLineChart("Groups leavings vs joins with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false);
 	}
 
 	private DefaultPieDataset<String> createPieDataset(Map<String, Long> values) {
@@ -129,17 +133,24 @@ public class ChartController {
 
 		SortedMap<LocalDateTime, Long> time2eventsNumber = getDatasetByTemporalEvents(events, granularityInHours);
 		for (Map.Entry<LocalDateTime, Long> entry : time2eventsNumber.entrySet()) {
-			// TODO: default
 			String currentValue = "";
 			if (granularityInHours == 24) {
-				currentValue = entry.getKey().getDayOfMonth() + "/" + entry.getKey().getMonthValue();
+				String day = formatDateTimeValue(entry.getKey().getDayOfMonth());
+				String month = formatDateTimeValue(entry.getKey().getMonthValue());
+				currentValue = day + "/" + month;
 			}
 			if (granularityInHours == 1) {
-				currentValue = entry.getKey().getHour() + ":" + entry.getKey().getMinute();
+				String hour = formatDateTimeValue(entry.getKey().getHour());
+				String minute = formatDateTimeValue(entry.getKey().getMinute());
+				currentValue = hour + ":" + minute;
 			}
 			dataset.addValue(entry.getValue(), eventNameInLegend, currentValue);
 		}
 		return dataset;
+	}
+
+	private String formatDateTimeValue(int value) {
+		return value < 10 ? "0" + value : String.valueOf(value);
 	}
 
 	private DefaultCategoryDataset createMultilineDataset(List<Pair<List<? extends TemporalEvent>, String>> eventsDatasets, int granularityInHours) {
@@ -154,7 +165,7 @@ public class ChartController {
 			} else {
 				SortedMap<LocalDateTime, Long> time2eventsNumberA = getDatasetByTemporalEvents(eventsDataset.getFirst(), granularityInHours);
 				for (Map.Entry<LocalDateTime, Long> entry : time2eventsNumberA.entrySet()) {
-					// TODO: default + duplicazione codice con metodo sopra
+					// TODO: duplicazione codice con metodo sopra
 					String currentValue = "";
 					if (granularityInHours == 24) {
 						currentValue = entry.getKey().getDayOfMonth() + "/" + entry.getKey().getMonthValue();
