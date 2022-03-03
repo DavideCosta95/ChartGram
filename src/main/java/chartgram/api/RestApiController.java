@@ -66,6 +66,7 @@ public class RestApiController {
 		model.addAttribute("authorized_group", groupTelegramId);
 	}
 
+	// TODO: introdurre ApiResponseBean senza dati ridondanti
 	@GetMapping("/{groupId}/messages")
 	public List<Message> getAllMessages(@PathVariable String groupId, @ModelAttribute("authorized_group") String authorizedGroup, HttpServletResponse response) {
 		if (groupId.equals(authorizedGroup) || test) {

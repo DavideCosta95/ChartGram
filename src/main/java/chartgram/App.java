@@ -34,6 +34,7 @@ public class App implements ApplicationRunner {
         }
     }
 
+    // TODO: leggi da resources interne e fai merge delle configurazioni trovate
     public static void setupConfigurationFiles() {
         File[] configurationFiles = { new File("./config/application.json"), new File("./config/configuration.json") };
         for (File configurationFile : configurationFiles) {
@@ -65,15 +66,16 @@ public class App implements ApplicationRunner {
             }
             int dashIndex = 0;
             for (int i = extensionStartIndex; i > 0; i--) {
-                if (s.charAt(i)=='-') {
+                if (s.charAt(i) == '-') {
                     dashIndex = i;
                     break;
                 }
             }
             if (dashIndex != 0) {
                 s = s.substring(dashIndex + 1, extensionStartIndex);
+                return s;
             }
-            return s;
+            return "";
         } catch (Exception e) {
             log.error("Cannot obtain artifact version", e);
             return null;
