@@ -13,7 +13,8 @@ ChartGram consists in:
   - Serves authenticated requests over HTTP, using JSON-serialized objects arrays.
 
 More details, about the implemented use-cases, available in the [user guide](/assets/docs/user_guide.md).  
-To test the application with the pre-loaded example data, follow the [test mode](/assets/docs/user_guide.md#test-mode) section of the guide.
+To test the application with the pre-loaded example data, follow the [test mode](/assets/docs/user_guide.md#test-mode) section of the guide.  
+Example screens of the application available [here](/assets/docs/example_screens.md).
 
 ## Usage
 

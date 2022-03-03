@@ -5,7 +5,7 @@ It will produce two effects:
 - API will not ask for an [authorization token](/assets/docs/user_guide.md#authentication) to retrieve data.
 - Using `analytics_command` (default=`/analytics`) and `charts_command` (default=`/charts`), both in `./config/configuration.json`, in a private chat with the bot would normally lead to an error message but in this mode the bot will send to the user respectively:
   - `analytics_command` a link to the webapp to view an example group data (the data of the group with the lowest id in the database, technically).
-  - `charts_command` all the implemented charts, representing an example group data, like stated in the previous point.
+  - `charts_command` all the implemented charts, representing an example group data, like stated in the previous point ([generated charts examples](/assets/docs/example_screens.md#chart-images-rendered-by-bot))
 
 In this mode, one will be able to see an arbitrary group data via API and using bot's commands, changing at will the group id in the url.
 
@@ -31,7 +31,7 @@ Bot commands must be used in the group which one is interested in.
 
 #### N.B.: With [test mode](/assets/docs/user_guide.md#test-mode) disabled, only group administrators are able to access their group's data.
 
-Bot interactions example screens available [here](/assets/docs/example_screens.md#chart-images-rendered-by-bot).
+Bot interactions example screens available [here](/assets/docs/example_screens.md).
 
 # API
 
