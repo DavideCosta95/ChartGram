@@ -5,7 +5,7 @@ It will produce two effects:
 - API will not ask for an [authorization token](/assets/docs/user_guide.md#authentication) to retrieve data.
 - Using `analytics_command` (default=`/analytics`) and `charts_command` (default=`/charts`), both in `./config/configuration.json`, in a private chat with the bot would normally lead to an error message but in this mode the bot will send to the user respectively:
   - `analytics_command` a link to the webapp to view an example group data (the data of the group with the lowest id in the database, technically).
-  - `charts_command` all the implemented charts, representing an example group data, like stated in the previous point ([generated charts examples](/assets/docs/example_screens.md#chart-images-rendered-by-bot))
+  - `charts_command` all the implemented charts, representing an example group data, like stated in the previous point ([generated charts examples](/assets/docs/example_screens.md#example-chart-images-rendered-by-bot))
 
 In this mode, one will be able to see an arbitrary group data via API and using bot's commands, changing at will the group id in the url.
 
@@ -77,7 +77,7 @@ All the calls must be performed by `HTTP GET` requests.
       "group": {
         "id": 1,
         "telegramId": "-100000000000",
-        "description": null,
+        "title": "title_1",
         "insertedAt": "2022-02-21T22:24:58.637772"
       },
       "text": "text",
@@ -107,6 +107,12 @@ All the calls must be performed by `HTTP GET` requests.
         "telegramLastName": "last_name_2",
         "telegramUsername": "username_2",
         "insertedAt": "2022-02-21T22:24:58.637772"
+      },
+      "group": {
+        "id": 1,
+        "telegramId": "-100000000000",
+        "title": "title_1",
+        "insertedAt": "2022-02-21T22:24:58.637772"
       }
     }
   ]
@@ -133,6 +139,12 @@ All the calls must be performed by `HTTP GET` requests.
         "telegramLastName": "last_name_2",
         "telegramUsername": "username_2",
         "insertedAt": "2022-02-21T23:22:14.029409"
+      },
+      "group": {
+        "id": 1,
+        "telegramId": "-100000000000",
+        "title": "title_1",
+        "insertedAt": "2022-02-21T22:24:58.637772"
       }
     }
   ]
