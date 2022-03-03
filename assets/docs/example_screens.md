@@ -14,16 +14,16 @@
 
 For example, it's notable from the following exam
 
-![chart_1](/assets/images/example_screens/charts/chart_1.jpg)  
+- ![chart_1](/assets/images/example_screens/charts/chart_1.jpg)  
 *"We can see that the main type of non-text message sent in the group are photos.  
 Overall, the trend of media sending fits with what expected, being that a Twitch streamer group."*  
-![chart_2](/assets/images/example_screens/charts/chart_2.jpg)  
+- ![chart_2](/assets/images/example_screens/charts/chart_2.jpg)  
 *"The graph confirms that the most intense activity days have been 24th and 27th of February.  
 On the 24th there has been a live-streaming by the group owner.  
 Instead, on the 27th, Game Freak announced the new Pokémon series chapter."*  
-![chart_3](/assets/images/example_screens/charts/chart_3.jpg)  
+- ![chart_3](/assets/images/example_screens/charts/chart_3.jpg)  
 *"Same for group joins, we can see how those events attracted new members."*  
-![chart_4](/assets/images/example_screens/charts/chart_4.jpg)  
+- ![chart_4](/assets/images/example_screens/charts/chart_4.jpg)  
 *"Being that a paid-subscription based group, the leaving events are due to the natural expiring of users' subscriptions, hence their trend is basically constant."*  
-![chart_5](/assets/images/example_screens/charts/chart_5.jpg)  
+- ![chart_5](/assets/images/example_screens/charts/chart_5.jpg)  
 *"In this graph we can appreciate the two trends mentioned above by the same view, noticing the different behaviors just exposed."*  
