@@ -125,20 +125,28 @@ public class TelegramController {
 					bot.sendMessageToSingleChat(locale.getHelpCommandText(), senderId.toString());
 					break;
 				case ANALYTICS:
-					UUID uuid = UUID.randomUUID();
-					groupAccessAuthorizations.put(uuid, groupId);
-					String webappBaseUrl = configuration.getWebappConfiguration().getBaseUrl();
-					int webappPort = configuration.getWebappConfiguration().getPort();
+					if (!bot.getAGroupAdmins(groupId).contains(bot.getBotId())) {
+						bot.sendMessageToSingleChat(locale.getBotMustBeAdminText(), groupId.toString());
+					} else {
+						UUID uuid = UUID.randomUUID();
+						groupAccessAuthorizations.put(uuid, groupId);
+						String webappBaseUrl = configuration.getWebappConfiguration().getBaseUrl();
+						int webappPort = configuration.getWebappConfiguration().getPort();
 
-					// TODO: parametrizzare
-					String textToSend = webappBaseUrl + ":" + webappPort + "/webapp/groups/" + groupId + "/?authorization=" + uuid;
-					log.debug("Generated url={}", textToSend);
-					bot.sendMessageToSingleChat(textToSend, senderId.toString());
-					bot.sendMessageToSingleChat(locale.getLinkSentViaPvtText(), groupId.toString());
+						// TODO: parametrizzare
+						String textToSend = webappBaseUrl + ":" + webappPort + "/webapp/groups/" + groupId + "/?authorization=" + uuid;
+						log.debug("Generated url={}", textToSend);
+						bot.sendMessageToSingleChat(textToSend, senderId.toString());
+						bot.sendMessageToSingleChat(locale.getLinkSentViaPvtText(), groupId.toString());
+					}
 					break;
 				case CHARTS:
-					bot.sendMessageToSingleChat(locale.getChartsSentViaPvtText(), groupId.toString());
-					sendAllCharts(senderId.toString(), groupId.toString(), groupTitle);
+					if (!bot.getAGroupAdmins(groupId).contains(bot.getBotId())) {
+						bot.sendMessageToSingleChat(locale.getBotMustBeAdminText(), groupId.toString());
+					} else {
+						bot.sendMessageToSingleChat(locale.getChartsSentViaPvtText(), groupId.toString());
+						sendAllCharts(senderId.toString(), groupId.toString(), groupTitle);
+					}
 					break;
 				case UNKNOWN:
 				default:
@@ -147,7 +155,7 @@ public class TelegramController {
 					break;
 			}
 		} else {
-			bot.sendMessageToSingleChat(locale.getMustBeAdminText(), groupId.toString());
+			bot.sendMessageToSingleChat(locale.getUserMustBeAdminText(), groupId.toString());
 		}
 	}
 

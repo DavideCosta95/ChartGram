@@ -28,9 +28,13 @@ public class Locale {
 	@NonNull
 	private String unknownCommandText;
 
-	@JsonProperty("must_be_admin_text")
+	@JsonProperty("user_must_be_admin_text")
 	@NonNull
-	private String mustBeAdminText;
+	private String userMustBeAdminText;
+
+	@JsonProperty("bot_must_be_admin_text")
+	@NonNull
+	private String botMustBeAdminText;
 
 	@JsonProperty("link_sent_via_pvt_text")
 	@NonNull

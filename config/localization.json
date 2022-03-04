@@ -7,7 +7,8 @@
         "non_command_text": "Usa /help per l'elenco dei comandi disponibili.",
         "private_command_not_allowed_text": "Questo comando deve essere usato in un gruppo.",
         "unknown_command_text": "Comando non riconosciuto.",
-        "must_be_admin_text": "Devi essere un amministratore del gruppo per usare questo comando.",
+        "user_must_be_admin_text": "Devi essere un amministratore del gruppo per usare questo comando.",
+        "bot_must_be_admin_text": "Il bot deve essere un amministratore del gruppo per usare questo comando e per poter raccogliere i dati.",
         "link_sent_via_pvt_text": "Il link ti è stato inviato in privato.",
         "charts_sent_via_pvt_text": "I grafici ti sono stati inviati in privato.",
         "generic_sent_via_pvt_text": "Risposta inviata in privato."
@@ -20,7 +21,8 @@
         "non_command_text": "Use /help for available commands list.",
         "private_command_not_allowed_text": "This command must be used in a group.",
         "unknown_command_text": "Command not recognized.",
-        "must_be_admin_text": "You must be an administrator of the group to use this command.",
+        "user_must_be_admin_text": "You must be an administrator of the group to use this command.",
+        "bot_must_be_admin_text": "Bot must be an administrator of the group to use this command and to collect data.",
         "link_sent_via_pvt_text": "Link sent via private message.",
         "charts_sent_via_pvt_text": "Charts sent via private message.",
         "generic_sent_via_pvt_text": "Response sent via private message"
