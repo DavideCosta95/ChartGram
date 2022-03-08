@@ -71,6 +71,16 @@
         <!-- Divider -->
         <hr class="sidebar-divider d-none d-md-block">
 
+        <!-- Nav Item - About -->
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/DavideCosta95/ChartGram">
+                <i class="fas fa-fw fa-code"></i>
+                <span>About</span></a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider d-none d-md-block">
+
         <!-- Sidebar Toggler (Sidebar) -->
         <div class="text-center d-none d-md-inline">
             <button class="rounded-circle border-0" id="sidebarToggle"></button>
@@ -92,16 +102,19 @@
                     <i class="fa fa-bars"></i>
                 </button>
 
+                <ul class="navbar-nav ml-auto">
+                    <div class="text-xl-center font-weight-bold text-primary text-uppercase" th:text="${group.title}"></div>
+                </ul>
+
                 <!-- Topbar Navbar -->
                 <ul class="navbar-nav ml-auto">
 
                     <!-- Nav Item - User Information -->
                     <li class="nav-item dropdown no-arrow">
                         <div class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
-                            <span class="mr-2 d-none d-lg-inline text-gray-600 small"
+                            <span class="mr-2 d-none d-lg-inline text-gray-600 big"
                                   th:text="${user.telegramFirstName}"></span>
-                            <img class="img-profile rounded-circle"
-                                 src="/img/undraw_profile.svg">
+                            <img class="img-profile rounded-circle" src="/img/undraw_profile.svg">
                         </div>
                     </li>
 
