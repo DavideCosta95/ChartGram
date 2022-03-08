@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface MessageRepository extends CrudRepository<Message, Long> {
 	List<Message> getAllByGroupTelegramId(String id);
+	long countAllByGroupTelegramId(String id);
 }

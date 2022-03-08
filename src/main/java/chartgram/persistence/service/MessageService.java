@@ -25,6 +25,10 @@ public class MessageService {
 		return result;
 	}
 
+	public long getCountByGroupTelegramId(String groupId) {
+		return messageRepository.countAllByGroupTelegramId(groupId);
+	}
+
 	public List<Message> getAllByGroupTelegramId(String groupId) {
 		return messageRepository.getAllByGroupTelegramId(groupId);
 	}
