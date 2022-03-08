@@ -55,4 +55,6 @@ public interface ITelegramBot {
 	List<Long> getAGroupAdmins(Long groupId);
 
 	void sendImage(InputStream image, String caption, String recipientId);
+
+	int getGroupMembersCount(String groupId);
 }

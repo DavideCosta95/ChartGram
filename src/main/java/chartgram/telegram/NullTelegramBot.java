@@ -137,4 +137,9 @@ public class NullTelegramBot implements ITelegramBot {
 	public void sendImage(InputStream image, String caption, String recipientId) {
 		// no-op
 	}
+
+	@Override
+	public int getGroupMembersCount(String groupId) {
+		return 0;
+	}
 }

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatAdministrators;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMemberCount;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -233,6 +234,13 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 		pinChatMessage.setChatId(groupId);
 		pinChatMessage.setMessageId(messageId);
 		return executeChatAction(pinChatMessage) != null;
+	}
+
+	public int getGroupMembersCount(String groupId) {
+		GetChatMemberCount countAction = new GetChatMemberCount();
+		countAction.setChatId(groupId);
+		Integer count = executeChatAction(countAction);
+		return count == null ? 0 : count;
 	}
 
 	private Message sendPhoto(SendPhoto photo) {
