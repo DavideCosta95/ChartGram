@@ -115,7 +115,7 @@ public class TelegramController {
 		Chat groupChat = update.getMessage().getChat();
 		Long groupId = update.getMessage().getChatId();
 		String groupTitle = groupChat.getTitle();
-		boolean isGroupAdmin = bot.getAGroupAdmins(groupId).contains(senderId);
+		boolean isGroupAdmin = bot.getAGroupAdmins(groupId.toString()).contains(senderId);
 
 		if (isGroupAdmin) {
 			switch (command) {
@@ -128,7 +128,7 @@ public class TelegramController {
 					bot.sendMessageToSingleChat(locale.getHelpCommandText(), senderId.toString());
 					break;
 				case ANALYTICS:
-					if (!bot.getAGroupAdmins(groupId).contains(bot.getBotId())) {
+					if (!bot.getAGroupAdmins(groupId.toString()).contains(bot.getBotId())) {
 						bot.sendMessageToSingleChat(locale.getBotMustBeAdminText(), groupId.toString());
 					} else {
 						UUID uuid = UUID.randomUUID();
@@ -144,7 +144,7 @@ public class TelegramController {
 					}
 					break;
 				case CHARTS:
-					if (!bot.getAGroupAdmins(groupId).contains(bot.getBotId())) {
+					if (!bot.getAGroupAdmins(groupId.toString()).contains(bot.getBotId())) {
 						bot.sendMessageToSingleChat(locale.getBotMustBeAdminText(), groupId.toString());
 					} else {
 						bot.sendMessageToSingleChat(locale.getChartsSentViaPvtText(), groupId.toString());

@@ -66,6 +66,8 @@ public class HomeController {
 			}
 
 			authorizationData = telegramController.getAuthorizationDataByUserUUID(authorizationUUID);
+			log.debug("Authorization data={}", authorizationData);
+
 			if (authorizationData == null || !authorizationData.getSecond().getTelegramId().equals(groupId)) {
 				response.setStatus(403);
 				log.info("Unrecognized user. Authorization={}", authorizationUUID);
@@ -87,7 +89,7 @@ public class HomeController {
 		model.addAttribute("group", group);
 		model.addAttribute("user", user);
 		model.addAttribute("members_count", telegramBot.getGroupMembersCount(group.getTelegramId()));
-		model.addAttribute("admins_count", telegramBot.getAGroupAdmins(group.getId()).size());
+		model.addAttribute("admins_count", telegramBot.getAGroupAdmins(group.getTelegramId()).size());
 		model.addAttribute("messages_count", servicesWrapper.getMessageService().getCountByGroupTelegramId(group.getTelegramId()));
 		model.addAttribute("api_url", configuration.getWebappConfiguration().getBaseUrl() + ":" + configuration.getWebappConfiguration().getPort() + "/api");
 		return "index";

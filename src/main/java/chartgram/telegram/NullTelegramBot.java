@@ -129,7 +129,7 @@ public class NullTelegramBot implements ITelegramBot {
 	}
 
 	@Override
-	public List<Long> getAGroupAdmins(Long groupId) {
+	public List<Long> getAGroupAdmins(String groupId) {
 		return Collections.emptyList();
 	}
 

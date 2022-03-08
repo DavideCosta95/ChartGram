@@ -105,9 +105,9 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 		onGroupMessageReceivedHandlers.forEach(e -> e.accept(update));
 	}
 
-	public List<Long> getAGroupAdmins(Long groupId) {
+	public List<Long> getAGroupAdmins(String groupId) {
 		GetChatAdministrators getChatAdministrators = new GetChatAdministrators();
-		getChatAdministrators.setChatId(groupId.toString());
+		getChatAdministrators.setChatId(groupId);
 		List<ChatMember> adminsList = executeChatAction(getChatAdministrators);
 		if (adminsList != null) {
 			return adminsList.stream()

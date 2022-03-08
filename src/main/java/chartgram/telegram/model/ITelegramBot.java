@@ -52,7 +52,7 @@ public interface ITelegramBot {
 
 	void sendMessageWithUrlByInlineKeyboard(String textToSend, String recipientId, String buttonText, String buttonUrl);
 
-	List<Long> getAGroupAdmins(Long groupId);
+	List<Long> getAGroupAdmins(String groupId);
 
 	void sendImage(InputStream image, String caption, String recipientId);
 
