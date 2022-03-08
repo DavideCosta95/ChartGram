@@ -1,8 +1,10 @@
 package chartgram.api;
 
 import chartgram.config.Configuration;
+import chartgram.model.Pair;
 import chartgram.persistence.entity.*;
 import chartgram.persistence.service.*;
+import chartgram.persistence.utils.TemporalEventComparator;
 import chartgram.telegram.TelegramController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,13 +59,13 @@ public class RestApiController {
 			log.info("Malformed authorization UUID={}", uuidString);
 			return;
 		}
-		Long groupTelegramId = telegramController.getGroupIdByAuthorizedUserUUID(authorizationUUID);
-		if (groupTelegramId == null) {
+		Pair<User, Group> authorizationData = telegramController.getAuthorizationDataByUserUUID(authorizationUUID);
+		if (authorizationData == null) {
 			response.setStatus(403);
 			log.info("Unrecognized user. Authorization={}", authorizationUUID);
 			return;
 		}
-		model.addAttribute("authorized_group", groupTelegramId);
+		model.addAttribute("authorized_group", authorizationData.getSecond().getTelegramId());
 	}
 
 	// TODO: introdurre ApiResponseBean senza dati ridondanti
@@ -72,7 +74,9 @@ public class RestApiController {
 		if (groupId.equals(authorizedGroup) || test) {
 			response.setStatus(200);
 			response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-			return messageService.getAllByGroupTelegramId(groupId);
+			List<Message> messages = messageService.getAllByGroupTelegramId(groupId);
+			messages.sort(new TemporalEventComparator());
+			return messages;
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
 			response.setStatus(403);
@@ -85,7 +89,9 @@ public class RestApiController {
 		if (groupId.equals(authorizedGroup) || test) {
 			response.setStatus(200);
 			response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-			return joinEventService.getAllByGroupTelegramId(groupId);
+			List<JoinEvent> joinEvents = joinEventService.getAllByGroupTelegramId(groupId);
+			joinEvents.sort(new TemporalEventComparator());
+			return joinEvents;
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
 			response.setStatus(403);
@@ -98,7 +104,9 @@ public class RestApiController {
 		if (groupId.equals(authorizedGroup) || test) {
 			response.setStatus(200);
 			response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-			return leaveEventService.getAllByGroupTelegramId(groupId);
+			List<LeaveEvent> leaveEvents = leaveEventService.getAllByGroupTelegramId(groupId);
+			leaveEvents.sort(new TemporalEventComparator());
+			return leaveEvents;
 		} else {
 			log.info("Authorization doesn't match queried group. Queried group={}, authorized group={}", groupId, authorizedGroup);
 			response.setStatus(403);

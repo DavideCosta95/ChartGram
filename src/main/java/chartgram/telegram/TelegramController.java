@@ -6,6 +6,7 @@ import chartgram.charts.model.ChartType;
 import chartgram.config.Configuration;
 import chartgram.config.Locale;
 import chartgram.config.Localization;
+import chartgram.model.Pair;
 import chartgram.persistence.entity.*;
 import chartgram.persistence.service.*;
 import chartgram.telegram.model.Command;
@@ -35,7 +36,7 @@ public class TelegramController {
 	private Map<String, User> knownUsers;
 	private Map<String, Group> knownGroups;
 	private final Map<String, List<String>> userTelegramId2GroupMemberships;
-	private final Map<UUID, Long> groupAccessAuthorizations;
+	private final Map<UUID, Pair<User, Group>> groupAccessAuthorizations;
 
 	public TelegramController(Configuration configuration, ChartController chartController, ITelegramBot bot, Localization localization, ServicesWrapper servicesWrapper) {
 		this.knownUsers = new HashMap<>();
@@ -109,9 +110,11 @@ public class TelegramController {
 	}
 
 	private void handleGroupCommand(Update update, Command command) {
-		Long senderId = update.getMessage().getFrom().getId();
+		org.telegram.telegrambots.meta.api.objects.User sender = update.getMessage().getFrom();
+		Long senderId = sender.getId();
+		Chat groupChat = update.getMessage().getChat();
 		Long groupId = update.getMessage().getChatId();
-		String groupTitle = update.getMessage().getChat().getTitle();
+		String groupTitle = groupChat.getTitle();
 		boolean isGroupAdmin = bot.getAGroupAdmins(groupId).contains(senderId);
 
 		if (isGroupAdmin) {
@@ -129,7 +132,7 @@ public class TelegramController {
 						bot.sendMessageToSingleChat(locale.getBotMustBeAdminText(), groupId.toString());
 					} else {
 						UUID uuid = UUID.randomUUID();
-						groupAccessAuthorizations.put(uuid, groupId);
+						groupAccessAuthorizations.put(uuid, new Pair<>(new User(senderId.toString(), sender.getFirstName(), sender.getLastName(), sender.getUserName()), new Group(groupId.toString(), groupTitle)));
 						String webappBaseUrl = configuration.getWebappConfiguration().getBaseUrl();
 						int webappPort = configuration.getWebappConfiguration().getPort();
 
@@ -232,7 +235,7 @@ public class TelegramController {
 		}
 	}
 
-	public Long getGroupIdByAuthorizedUserUUID(UUID uuid) {
+	public Pair<User, Group> getAuthorizationDataByUserUUID(UUID uuid) {
 		return groupAccessAuthorizations.get(uuid);
 	}
 
