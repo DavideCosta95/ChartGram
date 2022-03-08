@@ -78,7 +78,7 @@ public class HomeController {
 		}
 		else {
 			authorizationUUID = UUID.randomUUID();
-			authorizationData = new Pair<>(new User("0", "Test User", "", ""), new Group("1", "Test_Group"));
+			authorizationData = new Pair<>(new User("0", "Test User", "", ""), new Group(groupId, servicesWrapper.getGroupService().getByTelegramId(groupId).getTitle()));
 		}
 
 		User user = authorizationData.getFirst();
@@ -88,9 +88,9 @@ public class HomeController {
 		model.addAttribute("authorization_token", authorizationUUID.toString());
 		model.addAttribute("group", group);
 		model.addAttribute("user", user);
-		model.addAttribute("members_count", telegramBot.getGroupMembersCount(group.getTelegramId()));
-		model.addAttribute("admins_count", telegramBot.getAGroupAdmins(group.getTelegramId()).size());
-		model.addAttribute("messages_count", servicesWrapper.getMessageService().getCountByGroupTelegramId(group.getTelegramId()));
+		model.addAttribute("members_count", telegramBot.getGroupMembersCount(groupId));
+		model.addAttribute("admins_count", telegramBot.getAGroupAdmins(groupId).size());
+		model.addAttribute("messages_count", servicesWrapper.getMessageService().getCountByGroupTelegramId(groupId));
 		model.addAttribute("api_url", configuration.getWebappConfiguration().getBaseUrl() + ":" + configuration.getWebappConfiguration().getPort() + "/api");
 		return "index";
 	}

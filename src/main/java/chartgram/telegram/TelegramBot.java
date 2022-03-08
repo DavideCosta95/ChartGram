@@ -54,6 +54,9 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 	private void startup() {
 		String artifactVersion = App.getArtifactVersion();
 		String messageText = "\u2B50 BOT STARTED \u2B50" + (artifactVersion == null || artifactVersion.isEmpty() ? "" : " - v" + artifactVersion);
+		if (configuration.isTest()) {
+			messageText += "\nTest mode enabled!";
+		}
 		sendMessageToAllDevelopers(messageText);
 	}
 
