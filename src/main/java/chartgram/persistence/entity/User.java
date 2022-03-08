@@ -30,7 +30,6 @@ public class User {
 	private String telegramUsername;
 
 	@Column(name = "inserted_at", nullable = false)
-	@NonNull
 	private LocalDateTime insertedAt;
 
 	public User(@NonNull String telegramId, String telegramFirstName, String telegramLastName, String telegramUsername, @NonNull LocalDateTime insertedAt) {
@@ -39,5 +38,12 @@ public class User {
 		this.telegramLastName = telegramLastName;
 		this.telegramUsername = telegramUsername;
 		this.insertedAt = insertedAt;
+	}
+
+	public User(@NonNull String telegramId, String telegramFirstName, String telegramLastName, String telegramUsername) {
+		this.telegramId = telegramId;
+		this.telegramFirstName = telegramFirstName;
+		this.telegramLastName = telegramLastName;
+		this.telegramUsername = telegramUsername;
 	}
 }

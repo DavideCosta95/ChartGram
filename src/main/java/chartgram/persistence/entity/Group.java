@@ -25,12 +25,16 @@ public class Group {
 	private String title;
 
 	@Column(name="inserted_at", nullable = false)
-	@NonNull
 	private LocalDateTime insertedAt;
 
 	public Group(@NonNull String telegramId, @NonNull String title, @NonNull LocalDateTime insertedAt) {
 		this.telegramId = telegramId;
 		this.title = title;
 		this.insertedAt = insertedAt;
+	}
+
+	public Group(@NonNull String telegramId, @NonNull String title) {
+		this.telegramId = telegramId;
+		this.title = title;
 	}
 }
