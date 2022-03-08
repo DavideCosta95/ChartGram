@@ -90,7 +90,6 @@ public class HomeController {
 		model.addAttribute("admins_count", telegramBot.getAGroupAdmins(group.getId()).size());
 		model.addAttribute("messages_count", servicesWrapper.getMessageService().getCountByGroupTelegramId(group.getTelegramId()));
 		model.addAttribute("api_url", configuration.getWebappConfiguration().getBaseUrl() + ":" + configuration.getWebappConfiguration().getPort() + "/api");
-		//return "charts";
 		return "index";
 	}
 }
