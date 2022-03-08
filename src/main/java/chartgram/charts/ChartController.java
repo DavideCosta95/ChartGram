@@ -108,14 +108,14 @@ public class ChartController {
 	private JFreeChart makeLeavingsWithRespectTimeChart(String groupId, int granularityInHours) {
 		List<LeaveEvent> leavings = servicesWrapper.getLeaveEventService().getAllByGroupTelegramId(groupId);
 		DefaultCategoryDataset dataset = createLineDataset(leavings, granularityInHours, "leavings");
-		return ChartFactory.createLineChart("Groups leavings with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false);
+		return ChartFactory.createLineChart("Group leavings with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false);
 	}
 
 	private JFreeChart makeJoinsVsLeavingsWithRespectTimeChart(String groupId, int granularityInHours) {
 		List<LeaveEvent> leavings = servicesWrapper.getLeaveEventService().getAllByGroupTelegramId(groupId);
 		List<JoinEvent> joins = servicesWrapper.getJoinEventService().getAllByGroupTelegramId(groupId);
 		DefaultCategoryDataset dataset = createMultilineDataset(List.of(new Pair<>(leavings, "leavings"), new Pair<>(joins, "joins")), granularityInHours);
-		return ChartFactory.createLineChart("Groups leavings vs joins with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false);
+		return ChartFactory.createLineChart("Group leavings vs joins with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false);
 	}
 
 	private DefaultPieDataset<String> createPieDataset(Map<String, Long> values) {
@@ -168,10 +168,10 @@ public class ChartController {
 					// TODO: duplicazione codice con metodo sopra
 					String currentValue = "";
 					if (granularityInHours == 24) {
-						currentValue = entry.getKey().getDayOfMonth() + "/" + entry.getKey().getMonthValue();
+						currentValue = formatDateTimeValue(entry.getKey().getDayOfMonth()) + "/" + formatDateTimeValue(entry.getKey().getMonthValue());
 					}
 					if (granularityInHours == 1) {
-						currentValue = entry.getKey().getHour() + ":" + entry.getKey().getMinute();
+						currentValue = formatDateTimeValue(entry.getKey().getHour()) + ":" + formatDateTimeValue(entry.getKey().getMinute());
 					}
 					dataset.addValue(entry.getValue(), eventsDataset.getSecond(), currentValue);
 				}
