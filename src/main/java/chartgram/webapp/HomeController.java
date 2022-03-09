@@ -1,12 +1,14 @@
 package chartgram.webapp;
 
 import chartgram.config.Configuration;
+import chartgram.exceptions.ApiCommunicationException;
 import chartgram.model.Pair;
 import chartgram.persistence.entity.Group;
 import chartgram.persistence.entity.User;
 import chartgram.persistence.service.ServicesWrapper;
 import chartgram.telegram.TelegramController;
 import chartgram.telegram.model.ITelegramBot;
+import chartgram.webclient.HttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,8 +18,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Base64;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,14 +41,16 @@ public class HomeController {
 	private final TelegramController telegramController;
 	private final ITelegramBot telegramBot;
 	private final ServicesWrapper servicesWrapper;
+	private final HttpClient httpClient;
 	private final boolean test;
 
 	@Autowired
-	private HomeController(Configuration configuration, TelegramController telegramController, ITelegramBot telegramBot, ServicesWrapper servicesWrapper) {
+	private HomeController(Configuration configuration, TelegramController telegramController, ITelegramBot telegramBot, ServicesWrapper servicesWrapper, HttpClient httpClient) {
 		this.configuration = configuration;
 		this.telegramBot = telegramBot;
 		this.telegramController = telegramController;
 		this.servicesWrapper = servicesWrapper;
+		this.httpClient = httpClient;
 		this.test = configuration.isTest();
 	}
 
@@ -47,6 +58,9 @@ public class HomeController {
 	public String home(@PathVariable("groupId") String groupId, @RequestParam("authorization") Optional<String> authorization, Model model, HttpServletRequest request, HttpServletResponse response) {
 		UUID authorizationUUID;
 		Pair<User, Group> authorizationData;
+		User user;
+		Group group;
+
 		if (!test) {
 			if (authorization.isEmpty()) {
 				response.setStatus(401);
@@ -75,17 +89,20 @@ public class HomeController {
 				model.addAttribute(MODEL_ATTRIBUTE_ERROR_MESSAGE, "Unrecognized user");
 				return ERROR_PAGE;
 			}
+
+			user = authorizationData.getFirst();
+			group = authorizationData.getSecond();
+
+			request.getSession().setAttribute("authorization_token", authorizationUUID.toString());
+			model.addAttribute("authorization_token", authorizationUUID.toString());
+			model.addAttribute("user_propic", Base64.getEncoder().encodeToString(getUserPropicFile(user.getTelegramId())));
 		}
 		else {
-			authorizationUUID = UUID.randomUUID();
-			authorizationData = new Pair<>(new User("0", "Test User", "", ""), new Group(groupId, servicesWrapper.getGroupService().getByTelegramId(groupId).getTitle()));
+			user = new User("186029434", "Test User", "", "");
+			group = new Group(groupId, servicesWrapper.getGroupService().getByTelegramId(groupId).getTitle());
+			model.addAttribute("user_propic", Base64.getEncoder().encodeToString(getDefaultUserPropicAsByteArray()));
 		}
 
-		User user = authorizationData.getFirst();
-		Group group = authorizationData.getSecond();
-
-		request.getSession().setAttribute("authorization_token", authorizationUUID.toString());
-		model.addAttribute("authorization_token", authorizationUUID.toString());
 		model.addAttribute("group", group);
 		model.addAttribute("user", user);
 		model.addAttribute("members_count", telegramBot.getGroupMembersCount(groupId));
@@ -93,5 +110,36 @@ public class HomeController {
 		model.addAttribute("messages_count", servicesWrapper.getMessageService().getCountByGroupTelegramId(groupId));
 		model.addAttribute("api_url", configuration.getWebappConfiguration().getBaseUrl() + ":" + configuration.getWebappConfiguration().getPort() + "/api");
 		return "index";
+	}
+
+	private byte[] getUserPropicFile(String userId) {
+		var userPropic = telegramBot.getLatestUserPropic(Long.parseLong(userId));
+		if (userPropic == null) {
+			return new byte[0];
+		}
+		String filePath = telegramBot.getFileFromApi(userPropic.getFileId());
+		try {
+			return httpClient.doHttpGet("https://api.telegram.org/file/bot" + configuration.getBotConfiguration().getToken() + "/" + filePath, Collections.emptyMap());
+		} catch (ApiCommunicationException e) {
+			log.error("Error getting latest profile picture of user with Telegram id={}", userId, e);
+			return new byte[0];
+		}
+	}
+
+	private byte[] getDefaultUserPropicAsByteArray() {
+		URL imageUrl = getClass().getResource("/static/img/default_user_profile_picture.jpg");
+		if (imageUrl == null) {
+			return new byte[0];
+		}
+
+		try {
+			BufferedImage bImage = ImageIO.read(imageUrl);
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ImageIO.write(bImage, "jpg", bos );
+			return bos.toByteArray();
+		} catch (IOException e) {
+			log.error("Cannot read default user profile picture", e);
+			return new byte[0];
+		}
 	}
 }

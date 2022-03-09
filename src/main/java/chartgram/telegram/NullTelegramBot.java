@@ -4,6 +4,7 @@ import chartgram.model.Pair;
 import chartgram.telegram.model.ITelegramBot;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.InputStream;
@@ -141,5 +142,20 @@ public class NullTelegramBot implements ITelegramBot {
 	@Override
 	public int getGroupMembersCount(String groupId) {
 		return 0;
+	}
+
+	@Override
+	public List<PhotoSize> getAllUserPropics(Long userId) {
+		return Collections.emptyList();
+	}
+
+	@Override
+	public PhotoSize getLatestUserPropic(Long userId) {
+		return null;
+	}
+
+	@Override
+	public String getFileFromApi(String fileId) {
+		return null;
 	}
 }

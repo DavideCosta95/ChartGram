@@ -114,7 +114,7 @@
                         <div class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
                             <span class="mr-2 d-none d-lg-inline text-gray-600 big"
                                   th:text="${user.telegramFirstName}"></span>
-                            <img class="img-profile rounded-circle" src="/img/undraw_profile.svg">
+                            <img class="img-profile rounded-circle" th:src="'data:image/jpg;base64, ' + ${user_propic}">
                         </div>
                     </li>
 

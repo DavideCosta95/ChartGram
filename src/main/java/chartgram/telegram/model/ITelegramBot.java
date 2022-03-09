@@ -1,9 +1,7 @@
 package chartgram.telegram.model;
 
 import chartgram.model.Pair;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.*;
 
 import java.io.InputStream;
 import java.util.List;
@@ -57,4 +55,10 @@ public interface ITelegramBot {
 	void sendImage(InputStream image, String caption, String recipientId);
 
 	int getGroupMembersCount(String groupId);
+
+	List<PhotoSize> getAllUserPropics(Long userId);
+
+	PhotoSize getLatestUserPropic(Long userId);
+
+	String getFileFromApi(String fileId);
 }

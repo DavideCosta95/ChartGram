@@ -8,6 +8,8 @@ import chartgram.telegram.model.ITelegramBot;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatAdministrators;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMemberCount;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
@@ -24,6 +26,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -127,6 +130,32 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 		photo.setPhoto(new InputFile(image, "chart"));
 		photo.setCaption(caption);
 		sendPhoto(photo);
+	}
+
+	public List<PhotoSize> getAllUserPropics(Long userId) {
+		GetUserProfilePhotos getUserProfilePhotos = new GetUserProfilePhotos();
+		getUserProfilePhotos.setUserId(userId);
+		UserProfilePhotos photos = executeChatAction(getUserProfilePhotos);
+		if (photos == null) {
+			return Collections.emptyList();
+		}
+		return photos.getPhotos().stream()
+				.filter(Predicate.not(List::isEmpty))
+				.map(e -> e.get(0))
+				.collect(Collectors.toList());
+	}
+
+	public PhotoSize getLatestUserPropic(Long userId) {
+		List<PhotoSize> userPropics = getAllUserPropics(userId);
+		return userPropics.isEmpty() ? null : userPropics.get(0);
+	}
+
+	public String getFileFromApi(String fileId) {
+		GetFile getFile = new GetFile();
+		getFile.setFileId(fileId);
+		org.telegram.telegrambots.meta.api.objects.File file = executeChatAction(getFile);
+
+		return file == null ? null : file.getFilePath();
 	}
 
 	private void handleJoinUpdate(Update update) {
@@ -259,6 +288,7 @@ public class TelegramBot extends TelegramLongPollingBot implements ITelegramBot 
 		}
 		return null;
 	}
+
 
 	private <T extends Serializable, A extends BotApiMethod<T>> T executeChatAction(A action) {
 		try {
