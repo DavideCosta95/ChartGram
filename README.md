@@ -2,7 +2,7 @@
 
 ## Description
 
-ChartGram is a Telegram bot implementation, which collects data from the groups it's added as administrator and generates charts and graphs for these groups' administrators.
+ChartGram is a Telegram bot implementation, which collects data from the groups it's added as administrator and generates charts and graphs for these groups' administrators.  
 It also offers an authentication-based API to serve this data to external systems.
 ChartGram consists in:
 - #### Telegram bot
@@ -27,14 +27,14 @@ Example screens of the application available [here](/assets/docs/example_screens
     - #### From distributable jar
         - Download the [latest stable release](https://github.com/DavideCosta95/ChartGram/releases/latest) into project
           root.
-        - Run `java -jar ./ChartGram*.jar` from project root.
+        - Run `java -jar ./ChartGram-<VERSION>.jar` from project root.
 
     - #### From source
         - Run `./gradlew run` from project root.
 
     - #### Build from sources and run from generated artifact
         - Run `./gradlew build` from project root.
-        - Run `java -jar ./build/libs/ChartGram*.jar` from project root.
+        - Run `java -jar ./build/libs/ChartGram-<VERSION>.jar` from project root.
 
 ## Public instance
 
