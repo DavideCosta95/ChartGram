@@ -98,9 +98,17 @@ public class HomeController {
 			model.addAttribute("user_propic", Base64.getEncoder().encodeToString(getUserPropicFile(user.getTelegramId())));
 		}
 		else {
-			user = new User("186029434", "Test User", "", "");
+			Pair<User, UUID> testAuthorization = getTestModeAuthorizationData(authorization);
+			user = testAuthorization.getFirst();
+			UUID uuid = testAuthorization.getSecond();
+			if (uuid == null) {
+				model.addAttribute("user_propic", Base64.getEncoder().encodeToString(getDefaultUserPropicAsByteArray()));
+			} else {
+				request.getSession().setAttribute("authorization_token", uuid.toString());
+				model.addAttribute("authorization_token", uuid.toString());
+				model.addAttribute("user_propic", Base64.getEncoder().encodeToString(getUserPropicFile(user.getTelegramId())));
+			}
 			group = new Group(groupId, servicesWrapper.getGroupService().getByTelegramId(groupId).getTitle());
-			model.addAttribute("user_propic", Base64.getEncoder().encodeToString(getDefaultUserPropicAsByteArray()));
 		}
 
 		model.addAttribute("group", group);
@@ -110,6 +118,32 @@ public class HomeController {
 		model.addAttribute("messages_count", servicesWrapper.getMessageService().getCountByGroupTelegramId(groupId));
 		model.addAttribute("api_url", configuration.getWebappConfiguration().getBaseUrl() + ":" + configuration.getWebappConfiguration().getPort() + "/api");
 		return "index";
+	}
+
+	private Pair<User, UUID> getTestModeAuthorizationData(Optional<String> authorizationString) {
+		Pair<User, UUID> authorization = new Pair<>();
+		User testUser = new User("1", "Test User", "", "");
+		authorization.setFirst(testUser);
+		authorization.setSecond(null);
+
+		if (authorizationString.isEmpty()) {
+			return authorization;
+		}
+
+		UUID authorizationUUID;
+		try {
+			authorizationUUID = UUID.fromString(authorizationString.get());
+		} catch (IllegalArgumentException e) {
+			return authorization;
+		}
+
+		Pair<User, Group> authorizationData = telegramController.getAuthorizationDataByUserUUID(authorizationUUID);
+		if (authorizationData == null) {
+			return authorization;
+		}
+		authorization.setFirst(authorizationData.getFirst());
+		authorization.setSecond(authorizationUUID);
+		return authorization;
 	}
 
 	private byte[] getUserPropicFile(String userId) {

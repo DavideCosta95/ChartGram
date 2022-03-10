@@ -1,12 +1,21 @@
 package chartgram.model;
 
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 
-@Data
+@Getter
+@ToString
+@EqualsAndHashCode
+@AllArgsConstructor
+@NoArgsConstructor
 public class Pair<A, B> {
-	@NonNull
 	private A first;
-	@NonNull
 	private B second;
+
+	public void setFirst(A first) {
+		this.first = first;
+	}
+
+	public void setSecond(B second) {
+		this.second = second;
+	}
 }
