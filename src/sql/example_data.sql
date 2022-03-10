@@ -1,5 +1,5 @@
 -- groups --
-INSERT INTO groups (telegram_id, title, inserted_at) VALUES ('1', 'description_1', '2022-02-21 22:24:58.637772');
+INSERT INTO groups (telegram_id, title, inserted_at) VALUES ('1', 'Example_Group_Title', '2022-02-21 22:24:58.637772');
 
 
 -- users --
