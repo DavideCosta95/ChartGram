@@ -13,12 +13,15 @@ import chartgram.telegram.model.MessageType;
 import lombok.extern.slf4j.Slf4j;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.awt.*;
 import java.io.InputStream;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -71,6 +74,23 @@ public class ChartController {
 		return new Chart(image, caption);
 	}
 
+	// not void for fluent interface
+	private JFreeChart setLookToLineChart(JFreeChart chart) {
+		CategoryPlot plot = chart.getCategoryPlot();
+		plot.setBackgroundAlpha(0.25F);
+		plot.setDomainGridlinePaint(Color.DARK_GRAY);
+		plot.setRangeMinorGridlinePaint(Color.GRAY);
+		plot.setRangeGridlinePaint(Color.DARK_GRAY);
+		return chart;
+	}
+
+	// not void for fluent interface
+	private JFreeChart setLookToPieChart(JFreeChart chart) {
+		Plot plot = chart.getPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		return chart;
+	}
+
 	private JFreeChart makeMessagesDistributionByTypeChart(String groupId) {
 		List<Message> messages = servicesWrapper.getMessageService().getAllByGroupTelegramId(groupId);
 		long messagesCount = messages.size();
@@ -90,32 +110,32 @@ public class ChartController {
 						Map.Entry::getValue
 				));
 		DefaultPieDataset<String> dataset = createPieDataset(datasetMap);
-		return ChartFactory.createPieChart("Messages distribution by type", dataset, false, true, false);
+		return setLookToPieChart(ChartFactory.createPieChart("Messages distribution by type", dataset, false, true, false));
 	}
 
 	private JFreeChart makeMessagesWithRespectTimeChart(String groupId, int granularityInHours) {
 		List<Message> messages = servicesWrapper.getMessageService().getAllByGroupTelegramId(groupId);
 		DefaultCategoryDataset dataset = createLineDataset(messages, granularityInHours, "messages");
-		return ChartFactory.createLineChart("Messages sent with respect time", "Time", "Number of messages", dataset, PlotOrientation.VERTICAL, true, true, false);
+		return setLookToLineChart(ChartFactory.createLineChart("Messages sent with respect time", "Time", "Number of messages", dataset, PlotOrientation.VERTICAL, true, true, false));
 	}
 
 	private JFreeChart makeJoinsWithRespectTimeChart(String groupId, int granularityInHours) {
 		List<JoinEvent> joins = servicesWrapper.getJoinEventService().getAllByGroupTelegramId(groupId);
 		DefaultCategoryDataset dataset = createLineDataset(joins, granularityInHours, "joins");
-		return ChartFactory.createLineChart("Group joins with respect time", "Time", "Number of joins", dataset, PlotOrientation.VERTICAL, true, true, false);
+		return setLookToLineChart(ChartFactory.createLineChart("Group joins with respect time", "Time", "Number of joins", dataset, PlotOrientation.VERTICAL, true, true, false));
 	}
 
 	private JFreeChart makeLeavingsWithRespectTimeChart(String groupId, int granularityInHours) {
 		List<LeaveEvent> leavings = servicesWrapper.getLeaveEventService().getAllByGroupTelegramId(groupId);
 		DefaultCategoryDataset dataset = createLineDataset(leavings, granularityInHours, "leavings");
-		return ChartFactory.createLineChart("Group leavings with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false);
+		return setLookToLineChart(ChartFactory.createLineChart("Group leavings with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false));
 	}
 
 	private JFreeChart makeJoinsVsLeavingsWithRespectTimeChart(String groupId, int granularityInHours) {
 		List<LeaveEvent> leavings = servicesWrapper.getLeaveEventService().getAllByGroupTelegramId(groupId);
 		List<JoinEvent> joins = servicesWrapper.getJoinEventService().getAllByGroupTelegramId(groupId);
 		DefaultCategoryDataset dataset = createMultilineDataset(List.of(new Pair<>(leavings, "leavings"), new Pair<>(joins, "joins")), granularityInHours);
-		return ChartFactory.createLineChart("Group leavings vs joins with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false);
+		return setLookToLineChart(ChartFactory.createLineChart("Group leavings vs joins with respect time", "Time", "Number of leavings", dataset, PlotOrientation.VERTICAL, true, true, false));
 	}
 
 	private DefaultPieDataset<String> createPieDataset(Map<String, Long> values) {
