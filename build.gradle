@@ -13,7 +13,7 @@ apply plugin: 'java'
 mainClassName = 'chartgram.App'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
-version = '1.0.0'
+version = '1.0.1'
 
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

@@ -37,6 +37,7 @@ public class HomeController {
 	private static final String ERROR_PAGE = "error";
 	private static final String MODEL_ATTRIBUTE_ERROR_MESSAGE = "error_message";
 	private static final String MODEL_ATTRIBUTE_ERROR_CODE = "error_code";
+	private static final String SESSION_ATUTHORIZATION_TOKEN_ATTRIBUTE_NAME = "authorization_token";
 	private final Configuration configuration;
 	private final TelegramController telegramController;
 	private final ITelegramBot telegramBot;
@@ -63,10 +64,14 @@ public class HomeController {
 
 		if (!test) {
 			if (authorization.isEmpty()) {
-				response.setStatus(401);
-				model.addAttribute(MODEL_ATTRIBUTE_ERROR_CODE, "401");
-				model.addAttribute(MODEL_ATTRIBUTE_ERROR_MESSAGE, "Missing authorization token");
-				return ERROR_PAGE;
+				if (request.getSession().getAttribute(SESSION_ATUTHORIZATION_TOKEN_ATTRIBUTE_NAME) != null) {
+					authorization = Optional.of((String) request.getSession().getAttribute(SESSION_ATUTHORIZATION_TOKEN_ATTRIBUTE_NAME));
+				} else {
+					response.setStatus(401);
+					model.addAttribute(MODEL_ATTRIBUTE_ERROR_CODE, "401");
+					model.addAttribute(MODEL_ATTRIBUTE_ERROR_MESSAGE, "Missing authorization token");
+					return ERROR_PAGE;
+				}
 			}
 
 			try {
@@ -93,11 +98,10 @@ public class HomeController {
 			user = authorizationData.getFirst();
 			group = authorizationData.getSecond();
 
-			request.getSession().setAttribute("authorization_token", authorizationUUID.toString());
+			request.getSession().setAttribute(SESSION_ATUTHORIZATION_TOKEN_ATTRIBUTE_NAME, authorizationUUID.toString());
 			model.addAttribute("authorization_token", authorizationUUID.toString());
 			model.addAttribute("user_propic", Base64.getEncoder().encodeToString(getUserPropicFile(user.getTelegramId())));
-		}
-		else {
+		} else {
 			Pair<User, UUID> testAuthorization = getTestModeAuthorizationData(authorization);
 			user = testAuthorization.getFirst();
 			UUID uuid = testAuthorization.getSecond();
@@ -169,7 +173,7 @@ public class HomeController {
 		try {
 			BufferedImage bImage = ImageIO.read(imageUrl);
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ImageIO.write(bImage, "jpg", bos );
+			ImageIO.write(bImage, "jpg", bos);
 			return bos.toByteArray();
 		} catch (IOException e) {
 			log.error("Cannot read default user profile picture", e);

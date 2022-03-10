@@ -15,7 +15,7 @@ ChartGram consists in:
 More details, about the implemented use-cases, available in the [user guide](/assets/docs/user_guide.md).  
 To test the application with the pre-loaded example data, follow the [test mode](/assets/docs/user_guide.md#test-mode) section of the guide.  
 Example screens of the application available [here](/assets/docs/example_screens.md).  
-New charts and graphs are easily implementable at will, being the architecture flexible and modular.  
+New charts and graphs are easily implementable at will, using [collected data](/assets/docs/user_guide.md#database-er-diagram), being the architecture flexible and modular.  
 
 ## Usage
 
