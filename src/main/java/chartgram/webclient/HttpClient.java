@@ -55,7 +55,6 @@ public class HttpClient {
 			if (responseBean == null) {
 				throw new ApiCommunicationException("Error performing HTTP GET: response null");
 			}
-			log.debug("apiResponse={}", responseBean);
 			return responseBean;
 		} catch (ApiCommunicationException e) {
 			throw e;
