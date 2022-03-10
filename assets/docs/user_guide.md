@@ -35,13 +35,15 @@ Bot interactions example screens available [here](/assets/docs/example_screens.m
 
 # Webapp
 Collected data is available also on a webapp, reachable at `http://<BASE_URL>:<PORT>/webapp/groups/{groupId}/?authorization={token}`.  
-To configure `BASE_URL` and `PORT` in said url, go to [configuration files](/assets/docs/user_guide.md#configuration-files) guide section.  
-More information about authorization available [here](/assets/docs/user_guide.md#authentication).  
+To configure `BASE_URL` and `PORT` in said url, go to [configuration files](/assets/docs/user_guide.md#configuration-files) guide section.   
 The `{groupId}` path variable represents the Telegram id of the group which is querying for.  
 It must match the group id mapped by the authorization `token` present as query param, more details in the [authentication section](/assets/docs/user_guide.md#authentication).  
 
+The webapp will show various charts and information from the group ([example screen](/assets/docs/example_screens.md#webapp)).  
+It will also display the authenticated user's Telegram profile picture and name on the right of the top bar.  
+
 About the security layer, it is demanded to a reverse-proxy, to be placed architecturally between the application and the extern.  
-Like this, the system is more modular, and it's possible to restart this entry point without impacting the application, other than being able to change cipher key and various tunings.  
+In this way, the system is more modular, and it's possible to restart this entry point without impacting the application, other than being able to change cipher key and more various tunings.  
 
 # API
 
