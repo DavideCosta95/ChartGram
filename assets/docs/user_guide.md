@@ -1,13 +1,16 @@
 # Test mode
 
 To enable **test mode** set `"test": true` in `./config/configuration.json`.  
-It will produce two effects:
+It will produce three effects:
 - API will not ask for an [authorization token](/assets/docs/user_guide.md#authentication) to retrieve data.
 - Using `analytics_command` (default=`/analytics`) and `charts_command` (default=`/charts`), both in `./config/configuration.json`, in a private chat with the bot would normally lead to an error message but in this mode the bot will send to the user respectively:
   - `analytics_command` a link to the webapp to view an example group data (the data of the group with the lowest id in the database, technically).
   - `charts_command` all the implemented charts, representing an example group data, like stated in the previous point ([generated charts examples](/assets/docs/example_screens.md#example-chart-images-rendered-by-bot))
+- Webapp will be accessible without having to use the bot command nor having to present authentication token.
 
-In this mode, one will be able to see an arbitrary group data via API and using bot's commands, changing at will the group id in the url.
+In this mode, one will be able to retrieve an arbitrary group's data via API and using bot commands, changing at will the group id in the url.  
+To visit the webapp, use its url, as explained in [webapp section](/assets/docs/user_guide.md#webapp).  
+Default url is `http://localhost:8080/webapp/groups/1`.
 
 # Telegram groups features usage
 
@@ -22,12 +25,12 @@ The bot will store information about people joining/leaving the group and about 
 To retrieve this data, three ways are available, with respective returned data format:
 - Through [API](/assets/docs/user_guide.md#api)
   - JSON array
-- Using bot's `analytics_command`
+- Using bot's `analytics_command` (default=`/analytics`)
   - url to browse data on webapp
-- Using bot's `charts_command`
+- Using bot's `charts_command` (default=`/charts`)
   - rendered charts images sent via Telegram
 
-Bot commands must be used in the group which one is interested in.
+Bot commands must be used in the group which one is interested in, responses will be sent via private chat.
 
 #### N.B.: With [test mode](/assets/docs/user_guide.md#test-mode) disabled, only group administrators are able to access their group's data.
 

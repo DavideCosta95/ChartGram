@@ -36,6 +36,9 @@ Example screens of the application available [here](/assets/docs/example_screens
         - Run `./gradlew build` from project root.
         - Run `java -jar ./build/libs/ChartGram-<VERSION>.jar` from project root.
 
+After the first installation, the application is already in [test mode](/assets/docs/user_guide.md#test-mode).  
+Can be tested going to the webapp default url `http://localhost:8080/webapp/groups/1` to view the example group data, or using [bot commands](/assets/docs/user_guide.md#telegram-groups-features-usage).
+
 ## Public instance
 
 An up and running public instance is available for free [here](https://t.me/ChartGramBot).  
