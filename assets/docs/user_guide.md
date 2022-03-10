@@ -56,7 +56,7 @@ To disable authentication for API use, set `"test": true` in `./config/configura
 
 ## Endpoints
 
-The following endpoints are served from the base path (i.e. by default `localhost:8080`) and all return JSON arrays of object, with respect to the respective endpoint purpose.  
+The following endpoints are served from the base path (i.e. by default `localhost:8080`) and all return JSON objects arrays, with respect to the respective endpoint purpose.  
 All the calls must be performed by `HTTP GET` requests.  
 
 - `/api/groups/{groupId}/users`
@@ -175,7 +175,7 @@ This can be done in two equivalent ways:
 - Adding it as a request header: `authorization: <token>`.
 - Making the webapp set a session cookie when landing from the bot-generated link.
 
-For this base version of the application, the only way to obtain an authorization token is to use the bot's `analytics_command`.  
+For this base version of the application, the only way to obtain an authorization token is to use bot's `analytics_command`.  
 The aforesaid token will be added as `authorization` query param in the generated url.  
 An example of said url is the following:  
 `http://localhost:8080/webapp/groups/-1001338226930/?authorization=31ff6c8e-6373-4324-a810-5c10f9cc28a9`  
@@ -201,8 +201,8 @@ ChartGram uses four configuration files:
   - Bot's name, username and token from [Telegram bot setup process](/assets/docs/advanced_setup.md#telegram-bot-setup-telegram-account-needed) (ignored if `bot.enabled` is `false`).
   - String mappings for bot commands.
   - Ignore non commands messages flag to avoid sending responses to non-command messages from users.
-  - Developers id list for bot startup message and error reporting.
-  - Base url for domain customization to access webapp and API via generated urls.
+  - Developers ids list for bot startup message and error reporting.
+  - Base url, for domain customization, to access webapp and API via generated urls.
 - `localization.json`
   - Localization strings used in bot's messages templates.
 - `logback.xml`
