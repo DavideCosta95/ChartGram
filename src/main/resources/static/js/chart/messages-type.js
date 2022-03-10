@@ -37,8 +37,8 @@ $.getJSON(apiUrl + "/groups/" + groupId + "/messages", (data) => {
             labels: dataset.map((currentValue) => currentValue.label),
             datasets: [{
                 data: dataset.map((currentValue) => currentValue.value),
-                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
-                hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#feae65', '#d39df6', '#79fe7f', '#fd6970'],
+                hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#fc9c45', '#ba61f5', '#3ed445', '#fc4c54'],
                 hoverBorderColor: "rgba(234, 236, 244, 1)",
             }],
         },
