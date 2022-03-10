@@ -3,7 +3,7 @@ const Duration = luxon.Duration;
 const millisInDay = 1000 * 60 * 60 * 24;
 
 function formatDateFragment(n) {
-    return n > 10 ? "" + n : "0" + n;
+    return n > 9 ? ("" + n) : ("0" + n);
 }
 
 function defaultEmptyDataset() {

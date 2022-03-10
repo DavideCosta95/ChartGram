@@ -34,7 +34,7 @@
         <a class="sidebar-brand d-flex align-items-center justify-content-center"
            th:href="@{'/webapp/groups/' + ${group.telegramId}}">
             <div class="sidebar-brand-icon rotate-n-15">
-                <i class="fas fa-chart-line"></i>
+                <em class="fas fa-chart-line"></em>
             </div>
             <div class="sidebar-brand-text mx-3">ChartGram</div>
         </a>
@@ -43,7 +43,7 @@
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
                aria-expanded="true" aria-controls="collapsePages">
-                <i class="fas fa-comments fa-2x text-gray-300"></i>
+                <em class="fas fa-comments fa-2x text-gray-300"></em>
                 <span>Groups</span>
             </a>
             <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
@@ -57,14 +57,14 @@
         <!-- Nav Item - Members -->
         <li class="nav-item">
             <a class="nav-link" href="members.html">
-                <i class="fas fa-fw fa-users"></i>
+                <em class="fas fa-fw fa-users"></em>
                 <span>Members</span></a>
         </li>
 
         <!-- Nav Item - Admins -->
         <li class="nav-item">
             <a class="nav-link" href="admins.html">
-                <i class="fas fa-fw fa-crown"></i>
+                <em class="fas fa-fw fa-crown"></em>
                 <span>Admins</span></a>
         </li>
 
@@ -74,7 +74,7 @@
         <!-- Nav Item - About -->
         <li class="nav-item">
             <a class="nav-link" href="https://github.com/DavideCosta95/ChartGram">
-                <i class="fas fa-fw fa-code"></i>
+                <em class="fas fa-fw fa-code"></em>
                 <span>About</span></a>
         </li>
 
@@ -99,7 +99,7 @@
 
                 <!-- Sidebar Toggle (Topbar) -->
                 <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                    <i class="fa fa-bars"></i>
+                    <em class="fa fa-bars"></em>
                 </button>
 
                 <ul class="navbar-nav ml-auto">
@@ -114,7 +114,7 @@
                         <div class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
                             <span class="mr-2 d-none d-lg-inline text-gray-600 big"
                                   th:text="${user.telegramFirstName}"></span>
-                            <img class="img-profile rounded-circle" th:src="'data:image/jpg;base64, ' + ${user_propic}">
+                            <img alt="user_propic" class="img-profile rounded-circle" th:src="'data:image/jpg;base64, ' + ${user_propic}">
                         </div>
                     </li>
 
@@ -141,7 +141,7 @@
                                              th:text="${admins_count}"></div>
                                     </div>
                                     <div class="col-auto">
-                                        <i class="fas fa-crown fa-2x text-gray-300"></i>
+                                        <em class="fas fa-crown fa-2x text-gray-300"></em>
                                     </div>
                                 </div>
                             </div>
@@ -161,7 +161,7 @@
                                              th:text="${messages_count}"></div>
                                     </div>
                                     <div class="col-auto">
-                                        <i class="fas fa-envelope fa-2x text-gray-300"></i>
+                                        <em class="fas fa-envelope fa-2x text-gray-300"></em>
                                     </div>
                                 </div>
                             </div>
@@ -181,7 +181,7 @@
                                              th:text="${members_count}"></div>
                                     </div>
                                     <div class="col-auto">
-                                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                                        <em class="fas fa-users fa-2x text-gray-300"></em>
                                     </div>
                                 </div>
                             </div>
@@ -289,7 +289,7 @@
 
 <!-- Scroll to Top Button-->
 <a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
+    <em class="fas fa-angle-up"></em>
 </a>
 
 <!-- Bootstrap core JavaScript-->
@@ -306,12 +306,13 @@
 <script src="/vendor/chart.js/Chart.min.js"></script>
 
 <script th:inline="javascript">
-    var groupId = [[${group.telegramId}]];
-    var apiUrl = [[${api_url}]];
+    const groupId = [[${group.telegramId}]];
+    const apiUrl = [[${api_url}]];
 </script>
 
 <script src="/vendor/luxon.js"></script>
 
+<script type="text/javascript" th:src="@{/js/chart/utils.js}"></script>
 <script type="text/javascript" th:src="@{/js/chart/messages-type.js}"></script>
 <script type="text/javascript" th:src="@{/js/chart/messages.js}"></script>
 <script type="text/javascript" th:src="@{/js/chart/joins.js}"></script>
